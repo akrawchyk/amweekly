@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+from amweekly.shares.models import Share
+
+
+@admin.register(Share)
+class ShareAdmin(admin.ModelAdmin):
+    pass
