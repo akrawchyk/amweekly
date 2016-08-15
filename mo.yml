@@ -1,0 +1,4 @@
+domain: example.isl.codes
+heroku:
+  staging: amweekly-staging
+  production: amweekly

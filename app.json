@@ -1,0 +1,22 @@
+{
+  "name": "amweekly",
+  "env":{
+    "DJANGO_SETTINGS_MODULE":{
+      "value": "amweekly.settings"
+    },
+    "SECRET_KEY": {
+      "generator": "secret"
+    }
+  },
+  "addons":[
+    "heroku-postgresql:hobby-dev"
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    },
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
