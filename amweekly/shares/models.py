@@ -10,7 +10,7 @@ class Share(models.Model):
     user_name = models.CharField(max_length=255)
 
     def __str__(self):
-        if self.meta is not None and self.meta.title is not None:
+        if self.meta is not None and self.meta.title != '':
             return self.meta.title
         else:
             return self.url
@@ -25,7 +25,7 @@ class MetaURL(models.Model):
     type = models.CharField(blank=True, max_length=255)
 
     def __str__(self):
-        if self.title is not '':
+        if self.title != '':
             return self.title
         else:
             return self.url

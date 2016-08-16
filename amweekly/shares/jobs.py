@@ -9,7 +9,7 @@ from amweekly.shares.models import MetaURL
 import facebook
 
 
-def fetch_opengraph_data_for_share(share):
+def refresh_metaurl_for_share(share):
     if settings.FACEBOOK_CLIENT_ID is '' or \
        settings.FACEBOOK_CLIENT_SECRET is '':
         raise ImproperlyConfigured(
@@ -39,13 +39,14 @@ def fetch_opengraph_data_for_share(share):
         if not created:
             meta_url.url = og_url
 
-        for k, v in og['og_object'].items():
-            if k == 'title':
-                meta_url.title = v
-            if k == 'description':
-                meta_url.description = v
-            if k == 'type':
-                meta_url.type = v
+        if hasattr(og, 'og_object'):
+            for k, v in og['og_object'].items():
+                if k == 'title':
+                    meta_url.title = v
+                if k == 'description':
+                    meta_url.description = v
+                if k == 'type':
+                    meta_url.type = v
 
         meta_url.save()
         share.meta = meta_url

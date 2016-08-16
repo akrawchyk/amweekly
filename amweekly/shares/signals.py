@@ -4,9 +4,9 @@ from django.dispatch import receiver
 import django_rq
 
 from amweekly.shares.models import Share
-from amweekly.shares.jobs import fetch_opengraph_data_for_share
+from amweekly.shares.jobs import refresh_metaurl_for_share
 
 
-@receiver(post_save, sender=Share, dispatch_uid='get_share_meta_url')
-def get_share_meta_url(sender, share, **kwargs):
-    django_rq.enqueue(fetch_opengraph_data_for_share, share)
+@receiver(post_save, sender=Share, dispatch_uid='refresh_share_meta_url')
+def refresh_share_meta_url(sender, instance, **kwargs):
+    django_rq.enqueue(refresh_metaurl_for_share, instance)
