@@ -20,3 +20,5 @@ django-rq>=0.9,<0.10
 raven>=5.16,<5.17
 
 django-import-export>=0.4,<0.5
+
+opengraph>=0.5,<0.6

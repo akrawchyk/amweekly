@@ -157,3 +157,8 @@ if SENTRY_DSN:
     RAVEN_CONFIG = {
         'dsn': SENTRY_DSN,
     }
+
+# Facebook
+
+FACEBOOK_CLIENT_ID=config('FACEBOOK_CLIENT_ID', default='')
+FACEBOOK_CLIENT_SECRET=config('FACEBOOK_CLIENT_SECRET', default='')
