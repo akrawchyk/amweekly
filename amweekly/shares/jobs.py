@@ -9,7 +9,7 @@ from amweekly.shares.models import MetaURL
 import facebook
 
 
-def refresh_metaurl_for_share(share):
+def get_facebook_access_token():
     if settings.FACEBOOK_CLIENT_ID is '' or \
        settings.FACEBOOK_CLIENT_SECRET is '':
         raise ImproperlyConfigured(
@@ -28,7 +28,14 @@ def refresh_metaurl_for_share(share):
         else:
             raise ImproperlyConfigured(
                 'Facebook client id and secret are invalid.')
+    return facebook_access_token
 
+
+# TODO instead of doing this at post_save
+#      override the save method for meta_url that updates the relationship?
+#      or lookup og on share pre_save and then assign on meta_url post_save
+def refresh_metaurl_for_share(share_id):
+    facebook_access_token = get_facebook_access_token()
     graph = facebook.GraphAPI(facebook_access_token)
     og = graph.get_object(share.url)
     og_url = og['id']  # url as recognized by the open graph
@@ -36,10 +43,7 @@ def refresh_metaurl_for_share(share):
     if og_url is not None:
         meta_url, created = MetaURL.objects.get_or_create(url=og_url)
 
-        if not created:
-            meta_url.url = og_url
-
-        if hasattr(og, 'og_object'):
+        if 'og_object' in og:
             for k, v in og['og_object'].items():
                 if k == 'title':
                     meta_url.title = v
@@ -49,5 +53,6 @@ def refresh_metaurl_for_share(share):
                     meta_url.type = v
 
         meta_url.save()
-        share.meta = meta_url
-        share.save()
+        # FIXME infinite loop when the job is triggered post save, which causes another save here, etc etc
+        # share.meta = meta_url
+        # share.save()

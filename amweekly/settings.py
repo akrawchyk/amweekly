@@ -42,7 +42,7 @@ INSTALLED_APPS = (
 
     'import_export',
 
-    'amweekly.apps.AmweeklyConfig',
+    'amweekly',
     'amweekly.shares',
 )
 
