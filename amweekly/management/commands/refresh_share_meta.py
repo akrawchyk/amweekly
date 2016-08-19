@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 import django_rq
 
 from amweekly.shares.models import Share
-from amweekly.shares.jobs import refresh_metaurl_for_share
+from amweekly.shares.jobs import refresh_meta_url_for_share
 
 
 class Command(BaseCommand):
@@ -16,6 +16,6 @@ class Command(BaseCommand):
         for share_id in options['share_id']:
             try:
                 share = Share.objects.get(pk=share_id)
-                django_rq.enqueue(refresh_metaurl_for_share, share)
+                django_rq.enqueue(refresh_meta_url_for_share, share.id)
             except Share.DoesNotExist:
                 raise CommandError('Share {} doesn\'t exist.'.format(share_id))

@@ -5,7 +5,7 @@ from import_export.admin import ImportExportModelAdmin
 import django_rq
 
 from amweekly.shares.models import Share, MetaURL
-from amweekly.shares.jobs import refresh_metaurl_for_share
+from amweekly.shares.jobs import refresh_meta_url_for_share, refresh_meta_url
 
 
 class ShareResource(resources.ModelResource):
@@ -14,18 +14,25 @@ class ShareResource(resources.ModelResource):
         model = Share
 
 
-def refresh_share_meta(modeladmin, request, queryset):
+def refresh_share_metas(modeladmin, request, queryset):
     shares = queryset[:5]
     for share in shares:
-        django_rq.enqueue(refresh_metaurl_for_share, share)
-refresh_share_meta.short_description = 'Refresh OpenGraph data for share (max 5)'  # noqa
+        django_rq.enqueue(refresh_meta_url_for_share, share.id)
+refresh_share_metas.short_description = 'Refresh OpenGraph data (max 5)'
 
 
 @admin.register(Share)
 class ShareAdmin(ImportExportModelAdmin):
-    actions = [refresh_share_meta]
+    actions = [refresh_share_metas]
+
+
+def refresh_metas(modeladmin, request, queryset):
+    meta_urls = queryset[:5]
+    for meta_url in meta_urls:
+        django_rq.enqueue(refresh_meta_url, meta_url.id)
+refresh_metas.short_description = 'Refresh OpenGraph data (max 5)'
 
 
 @admin.register(MetaURL)
 class MetaURLAdmin(admin.ModelAdmin):
-    pass
+    actions = [refresh_metas]

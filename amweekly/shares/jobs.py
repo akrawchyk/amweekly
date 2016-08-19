@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 
-from amweekly.shares.models import MetaURL
+from amweekly.shares.models import MetaURL, Share
 
 import facebook
 
@@ -30,29 +30,69 @@ def get_facebook_access_token():
                 'Facebook client id and secret are invalid.')
     return facebook_access_token
 
-
-# TODO instead of doing this at post_save
-#      override the save method for meta_url that updates the relationship?
-#      or lookup og on share pre_save and then assign on meta_url post_save
-def refresh_metaurl_for_share(share_id):
+def get_og_object(lookup):
+    """
+    Expected Graph API Response
+        {
+        "og_object": {
+            "id": "10150192219203164",
+            "title": "https://developers.facebook.com/tools/explorer/",
+            "type": "website",
+            "updated_time": "2016-08-18T06:55:10+0000"
+        },
+        "share": {
+            "comment_count": 4,
+            "share_count": 2572
+        },
+        "id": "https://developers.facebook.com/tools/explorer/"
+        }
+    """
     facebook_access_token = get_facebook_access_token()
     graph = facebook.GraphAPI(facebook_access_token)
-    og = graph.get_object(share.url)
+    og = graph.get_object(lookup)
     og_url = og['id']  # url as recognized by the open graph
-
+    og_object = None
     if og_url is not None:
-        meta_url, created = MetaURL.objects.get_or_create(url=og_url)
-
         if 'og_object' in og:
-            for k, v in og['og_object'].items():
+            og_object = og['og_object']
+    return (og_url, og_object)
+
+
+def refresh_meta_url_for_share(share_id):
+    share = Share.objects.get(pk=share_id)
+    og_url, og_object = get_og_object(share.url)
+    meta_url, created = MetaURL.objects.get_or_create(og_url=og_url)
+
+    if og_object is not None:
+        for k, v in og_object.items():
+            if k == 'title':
+                meta_url.og_title = v
+            if k == 'description':
+                meta_url.og_description = v
+            if k == 'type':
+                meta_url.og_type = v
+            if k == 'id':
+                meta_url.og_id = v
+
+    meta_url.save()
+
+
+def refresh_meta_url(meta_url_id):
+    try:
+        meta_url = MetaURL.objects.get(pk=meta_url_id)
+        og_url, og_object = get_og_object(meta_url.og_url)
+
+        if og_object is not None:
+            for k, v in og_object.items():
                 if k == 'title':
-                    meta_url.title = v
+                    meta_url.og_title = v
                 if k == 'description':
-                    meta_url.description = v
+                    meta_url.og_description = v
                 if k == 'type':
-                    meta_url.type = v
+                    meta_url.og_type = v
+                if k == 'id':
+                    meta_url.og_id = v
 
         meta_url.save()
-        # FIXME infinite loop when the job is triggered post save, which causes another save here, etc etc
-        # share.meta = meta_url
-        # share.save()
+    except MetaURL.DoesNotExist:
+        return
