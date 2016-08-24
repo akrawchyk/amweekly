@@ -30,6 +30,7 @@ def get_facebook_access_token():
                 'Facebook client id and secret are invalid.')
     return facebook_access_token
 
+
 def get_og_object(lookup):
     """
     Expected Graph API Response

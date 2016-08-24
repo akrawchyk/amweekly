@@ -3,7 +3,7 @@ waitress>=0.8,<0.9
 whitenoise>=3.2,<3.3
 
 dj-database-url==0.4.1
-django-debug-toolbar>=1.5,<1.6
+-e git+git://github.com/jazzband/django-debug-toolbar@388e177eb19a2b51f7663003a1aa509ee56bbb7a##egg=django-debug-toolbar
 
 python-decouple==3.0
 pytz==2015.7

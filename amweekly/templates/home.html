@@ -1,7 +1,15 @@
 {% extends 'base.html' %}
 
+{% load cache %}
+
 {% block content %}
 <main>
-    <h1>Hello, amweekly!</h1>
+    <h1>Recent shares:</h1>
+
+    {% for share in shares %}
+    <div class="share">
+        <a href="{{ share.url }}">{{ share }}</a>
+    </div>
+    {% endfor %}
 </main>
 {% endblock content %}
