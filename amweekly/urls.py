@@ -4,9 +4,9 @@ from django.contrib import admin
 from amweekly.views import HomePageView
 
 urlpatterns = [
-    # Examples:
     url(r'^$', HomePageView.as_view(), name='home'),
-    # url(r'^blog/', include('blog.urls')),
+
+    url(r'^slack/', include('amweekly.slack.urls')),
 
     url(r'^admin/rq/', include('django_rq.urls')),
 

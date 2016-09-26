@@ -44,6 +44,7 @@ INSTALLED_APPS = (
 
     'amweekly.apps.AmweeklyConfig',
     'amweekly.shares',
+    'amweekly.slack',
 )
 
 MIDDLEWARE = [
