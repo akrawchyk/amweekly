@@ -1,12 +1,15 @@
+import logging
 from urllib.request import urlopen
 
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 
+import facebook
+
 from amweekly.shares.models import MetaURL, Share
 
-import facebook
+logger = logging.getLogger(__name__)
 
 
 def get_facebook_access_token():
@@ -60,22 +63,14 @@ def get_og_object(lookup):
 
 
 def refresh_meta_url_for_share(share_id):
-    share = Share.objects.get(pk=share_id)
-    og_url, og_object = get_og_object(share.url)
-    meta_url, created = MetaURL.objects.get_or_create(og_url=og_url)
+    try:
+        share = Share.objects.get(pk=share_id)
+        og_url, og_object = get_og_object(share.url)
+        meta_url, created = MetaURL.objects.get_or_create(og_url=og_url)
 
-    if og_object is not None:
-        for k, v in og_object.items():
-            if k == 'title':
-                meta_url.og_title = v
-            if k == 'description':
-                meta_url.og_description = v
-            if k == 'type':
-                meta_url.og_type = v
-            if k == 'id':
-                meta_url.og_id = v
-
-    meta_url.save()
+        refresh_meta_url(meta_url.id)
+    except Share.DoesNotExist:
+        logger.error('Share with id {} does not exist.'.format(share_id))
 
 
 def refresh_meta_url(meta_url_id):
@@ -96,4 +91,4 @@ def refresh_meta_url(meta_url_id):
 
         meta_url.save()
     except MetaURL.DoesNotExist:
-        return
+        logger.error('MetaURL with id {} does not exist.'.format(meta_url_id))

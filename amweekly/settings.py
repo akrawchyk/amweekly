@@ -105,7 +105,8 @@ USE_TZ = True
 # Caching
 
 CACHE_MIDDLEWARE_ALIAS = config('CACHE_MIDDLEWARE_ALIAS', default='default')
-CACHE_MIDDLEWARE_SECONDS = config('CACHE_MIDDLEWARE_SECONDS', default=600, cast=int)
+CACHE_MIDDLEWARE_SECONDS = config('CACHE_MIDDLEWARE_SECONDS', default=600,
+                                  cast=int)
 CACHE_MIDDLEWARE_KEY_PREFIX = config('CACHE_MIDDLEWARE_KEY_PREFIX',
                                      default='amweekly-')
 
@@ -170,5 +171,9 @@ if SENTRY_DSN:
 
 # Facebook
 
-FACEBOOK_CLIENT_ID=config('FACEBOOK_CLIENT_ID', default='')
-FACEBOOK_CLIENT_SECRET=config('FACEBOOK_CLIENT_SECRET', default='')
+FACEBOOK_CLIENT_ID = config('FACEBOOK_CLIENT_ID', default='')
+FACEBOOK_CLIENT_SECRET = config('FACEBOOK_CLIENT_SECRET', default='')
+
+# Slack
+
+SLACK_TOKENS=config('SLACK_TOKENS', cast=lambda v: [s.strip() for s in v.split(',')])  #noqa

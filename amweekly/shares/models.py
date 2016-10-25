@@ -11,7 +11,7 @@ class Share(models.Model):
     url = models.URLField()
     meta = models.ForeignKey('MetaURL', blank=True, null=True)
 
-    def __str__(self):
+    def __unicode__(self):
         return '{} on {}'.format(self.user_name, self.created_at)
 
     def save(self, *args, **kwargs):
@@ -30,7 +30,7 @@ class MetaURL(models.Model):
     og_type = models.CharField(blank=True, max_length=255)
     og_url = models.URLField()
 
-    def __str__(self):
+    def __unicode__(self):
         if self.og_title != '':
             return self.og_title
         else:
