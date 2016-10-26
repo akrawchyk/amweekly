@@ -1,4 +1,3 @@
-import json
 import logging
 
 from django.conf import settings
@@ -15,37 +14,26 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 @require_POST
 def slash_command_webhook(request):
-    body_json = json.dumps(request.POST.dict())
-
-    print(request.META)
-
-    webhook_transaction = WebhookTransaction.objects.create(
-        body=body_json,
-        request_meta={'0': 1}  # FIXME
-    )
-
     token = request.POST.get('token')
 
     if not token:
-        logger.error(
-            'WebhookTransaction with id {} does not have a token.'.format(
-                webhook_transaction.id))
+        logger.error('Slash Command request does not have a token.')
         return HttpResponse(status=400)
 
     if token not in settings.SLACK_TOKENS:
-        logger.error(
-            'WebhookTransaction with id {} has unrecognized token.'.format(
-                webhook_transaction.id))
+        logger.error('Slash Command request has an unrecognized token.')
         return HttpResponse(status=400)
 
     command = request.POST.get('command')
 
     if not command:
-        logger.error(
-            'WebhookTransaction with id {} is not a Slash Command.'.format(
-                webhook_transaction.id))
-        print('no command')
+        logger.error('Slash Command request is not a Slash Command.')
         return HttpResponse(status=400)
 
-    process_slash_command_webhook(webhook_transaction.id)
-    return HttpResponse(status=200)
+    webhook_transaction = WebhookTransaction.objects.create(
+        body=request.POST.dict(),
+        request_meta={}  # TODO: copy request.META here
+    )
+
+    message = process_slash_command_webhook(webhook_transaction.id)
+    return HttpResponse(message, status=200)
