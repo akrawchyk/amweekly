@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=IncomingWebhook, dispatch_uid='schedule_incoming_webhook')  # noqa
 def schedule_incoming_webhook(sender, instance, **kwargs):
-    logger.info('Scheduling IncomingWebhook {}'.format(instance.id))
+    logger.info('IncomingWebhook {} processed'.format(instance.id))
     process_incoming_webhook(instance.id)
     # TODO
     # refactor this logic to:

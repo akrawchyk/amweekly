@@ -29,7 +29,7 @@ def process_slash_command_webhook(webhook_transaction_id):
             webhook_transaction=webhook_transaction
         )
 
-        logger.info('Processing SlashCommand {}', slash_command.id)
+        logger.info('SlashCommand {} processed', slash_command.id)
 
         Share.objects.create(
             user_name=slash_command.user_name,
@@ -39,16 +39,16 @@ def process_slash_command_webhook(webhook_transaction_id):
         webhook_transaction.status = WebhookTransaction.PROCESSED
         webhook_transaction.content_object = slash_command
         webhook_transaction.save()
-        return 'SlashCommand {} processed successfully'.format(
-                slash_command.command)
+        log = 'SlashCommand {} processed successfully'.format(
+            slash_command.id)
+        logger.info(log)
+        return log
     except Exception as e:
-        logger.error(
-            'WebhookTransaction with id {} failed to process: {}'.format(
-                webhook_transaction_id, str(e)))
         webhook_transaction.status = WebhookTransaction.ERROR
         webhook_transaction.save()
-        return 'Failed to process Slash Command {}'.format(
-            slash_command.command)
+        log = 'SlashCommand {} failed to process: {}'.format(
+            slash_command.id, str(e))
+        return log
 
 
 def process_incoming_webhook(incoming_webhook_id):
@@ -86,12 +86,14 @@ def process_incoming_webhook(incoming_webhook_id):
             r.raise_for_status()
             webhook_transaction.status = WebhookTransaction.PROCESSED
             webhook_transaction.save()
+            logger.info('IncomingWebhook {} processed successfully'.format(
+                incoming_webhook.id))
         except Exception as e:
-            logger.error(
-                'IncomingWebhook with id {} failed to POST: {}'.format(
-                    incoming_webhook_id, str(e)))
             webhook_transaction.status = WebhookTransaction.ERROR
             webhook_transaction.save()
+            logger.error(
+                'IncomingWebhook {} failed to POST: {}'.format(
+                    incoming_webhook_id, str(e)))
     except IncomingWebhook.DoesNotExist:
         logger.error(
             'IncomingWebhook with id {} does not exist'.format(
