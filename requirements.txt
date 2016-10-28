@@ -3,7 +3,7 @@ waitress>=0.8,<0.9
 whitenoise>=3.2,<3.3
 
 dj-database-url==0.4.1
--e git+git://github.com/jazzband/django-debug-toolbar@388e177eb19a2b51f7663003a1aa509ee56bbb7a##egg=django-debug-toolbar
+django-debug-toolbar>=1.6,<1.7
 
 python-decouple==3.0
 pytz==2015.7
@@ -15,7 +15,8 @@ redis>=2.10,<2.11
 django-redis>=4.3,<4.4
 
 rq>=0.5,<0.6
--e git+git://github.com/ui/django-rq@8689bde4f35665a08024e1f7101b3a122f3d15ea#egg=django-rq
+rq-scheduler>=0.6,<0.7
+django-rq>=0.9,<0.10
 
 raven>=5.16,<5.17
 
@@ -23,4 +24,8 @@ django-import-export>=0.4,<0.5
 
 opengraph>=0.5,<0.6
 
-facebook-sdk==2.0.0
+facebook-sdk>=2.0,<2.1
+
+crontab>=0.21,<0.22
+
+requests>=2.11,<2.12

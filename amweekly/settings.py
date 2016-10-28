@@ -122,6 +122,32 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'public', 'media')
 
+# Logging
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': config('DJANGO_LOG_LEVEL', default='INFO')
+        },
+        'amweekly.shares': {
+            'handlers': ['console'],
+            'level': config('DJANGO_LOG_LEVEL', default='INFO')
+        },
+        'amweekly.slack': {
+            'handlers': ['console'],
+            'level': config('DJANGO_LOG_LEVEL', default='INFO')
+        },
+    },
+}
+
 # SSL
 
 SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)

@@ -31,6 +31,7 @@ def get_facebook_access_token():
         else:
             raise ImproperlyConfigured(
                 'Facebook client id and secret are invalid.')
+    logger.info('Facebook access token retrieved successfully')
     return facebook_access_token
 
 
