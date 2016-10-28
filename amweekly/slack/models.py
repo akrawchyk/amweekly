@@ -41,7 +41,7 @@ class WebhookTransaction(BaseTransaction, models.Model):
     headers = JSONField()
     content_type = models.ForeignKey(ContentType, blank=True, null=True)
     object_id = models.PositiveIntegerField(blank=True, null=True)
-    content_object = GenericForeignKey()
+    integration = GenericForeignKey()
 
     def __str__(self):
         return u'{0}'.format(self.created_at)

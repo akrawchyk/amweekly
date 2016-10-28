@@ -37,7 +37,7 @@ def process_slash_command_webhook(webhook_transaction_id):
         )
 
         webhook_transaction.status = WebhookTransaction.PROCESSED
-        webhook_transaction.content_object = slash_command
+        webhook_transaction.integration = slash_command
         webhook_transaction.save()
         log = 'SlashCommand {} processed successfully'.format(
             slash_command.id)
@@ -75,7 +75,7 @@ def process_incoming_webhook(incoming_webhook_id):
         webhook_transaction = WebhookTransaction.objects.create(
             body=message,
             headers=kwargs['headers'],
-            content_object=incoming_webhook
+            integration=incoming_webhook
         )
 
         try:
