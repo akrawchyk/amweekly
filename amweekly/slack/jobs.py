@@ -70,9 +70,7 @@ def process_incoming_webhook(incoming_webhook_id):
         if incoming_webhook.icon_emoji:
             message['icon_emoji'] = incoming_webhook.icon_emoji
 
-        kwargs['data'] = {
-            'data': json.dumps(message)
-        }
+        kwargs['data'] = json.dumps(message)
 
         webhook_transaction = WebhookTransaction.objects.create(
             body=message,
