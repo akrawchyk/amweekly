@@ -15,16 +15,20 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=IncomingWebhook, dispatch_uid='schedule_incoming_webhook')  # noqa
 def schedule_incoming_webhook(sender, instance, **kwargs):
-    logger.info('IncomingWebhook {} processed'.format(instance.id))
-    process_incoming_webhook(instance.id)
+    """
     # TODO
     # refactor this logic to:
     #  * dedupe previously scheduled crons
     #  * support repeating incoming webhooks
     #  * support rescheduling after shutdown
-    # next = CronTab(instance.crontab).next()
-    # scheduler = django_rq.get_scheduler('default')
-    # scheduler.enqueue_in(
-    #     timedelta(seconds=next),
-    #     process_incoming_webhook,
-    #     instance.id)
+    #  * move crontab field off of IncomingWebhook?
+    #  * repeatable jobs can just schedule themselves again after they finish
+    """
+    next = CronTab(instance.crontab).next()
+    scheduler = django_rq.get_scheduler('default')
+    scheduler.enqueue_in(
+        timedelta(seconds=next),
+        process_incoming_webhook,
+        instance.id)
+    logger.info('IncomingWebhook {} is scheduled for {}s from now'.format(
+        instance.id, next))

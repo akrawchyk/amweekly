@@ -10,6 +10,7 @@
 *.db
 *.swp
 *~
+.cache/
 __pycache__/
 /tmp/
 .bundle/

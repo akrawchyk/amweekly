@@ -31,6 +31,10 @@ def process_slash_command_webhook(webhook_transaction_id):
 
         logger.info('SlashCommand {} processed', slash_command.id)
 
+        # TODO
+        # command registry used to decouple shares from the slack app
+        #  * call functions based on slack's command with text as input
+        #  * use argparse to allow passing argyuments
         Share.objects.create(
             user_name=slash_command.user_name,
             url=slash_command.text

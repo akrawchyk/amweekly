@@ -70,7 +70,7 @@ def get_og_object(lookup):
     return (og_url, og_object)
 
 
-def refresh_meta_url_for_share(share_id):
+def refresh_share_meta_url(share_id):
     try:
         share = Share.objects.get(pk=share_id)
         og_url, og_object = get_og_object(share.url)
@@ -98,5 +98,6 @@ def refresh_meta_url(meta_url_id):
                     meta_url.og_id = v
 
         meta_url.save()
+        logger.info('MetaURL {} refreshed'.format(meta_url_id))
     except MetaURL.DoesNotExist:
-        logger.error('MetaURL with id {} does not exist.'.format(meta_url_id))
+        logger.error('MetaURL {} does not exist.'.format(meta_url_id))
