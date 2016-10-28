@@ -1,11 +1,17 @@
-from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey, \
+    GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.utils.translation import ugettext_lazy as _
+
+from crontab import CronTab
 
 
-class WebhookTransaction(models.Model):
+class BaseTransaction(models.Model):
     """
-    Used to track the status of transactions with Slack. Stores raw request
-    data as JSON.
+    Used to track the status of a transaction.
     """
     UNPROCESSED = 1
     PROCESSED = 2
@@ -21,10 +27,23 @@ class WebhookTransaction(models.Model):
     status = models.CharField(max_length=1,
                               choices=STATUSES,
                               default=UNPROCESSED)
-    body = JSONField()
-    request_meta = JSONField()
 
-    def __unicode__(self):
+    class Meta:
+        abstract = True
+
+
+class WebhookTransaction(BaseTransaction, models.Model):
+    """
+    Represents a webhook transaction with Slack. Stores raw transaction data as
+    JSON.
+    """
+    body = JSONField()
+    headers = JSONField()
+    content_type = models.ForeignKey(ContentType, blank=True, null=True)
+    object_id = models.PositiveIntegerField(blank=True, null=True)
+    integration = GenericForeignKey()
+
+    def __str__(self):
         return u'{0}'.format(self.created_at)
 
 
@@ -61,8 +80,21 @@ class IncomingWebhook(models.Model):
     See docs at https://api.slack.com/incoming-webhooks.
     """
     created_at = models.DateTimeField(auto_now_add=True)
+    crontab = models.CharField(max_length=255)
+    webhook_transactions = GenericRelation(WebhookTransaction)
 
     webhook_url = models.URLField()
     text = models.TextField(blank=True)
     username = models.CharField(max_length=255, blank=True)
     icon_emoji = models.CharField(max_length=255, blank=True)
+    icon_url = models.URLField(blank=True)
+
+    def clean(self):
+        try:
+            CronTab(self.crontab)
+        except:
+            raise ValidationError(_('Unrecognized crontab `{}`').format(
+                self.crontab))
+
+
+# TODO make a scheduled class for recovering after shutdown for repeatable

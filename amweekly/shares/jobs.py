@@ -1,36 +1,44 @@
 import logging
-from urllib.request import urlopen
 
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 
 import facebook
+import requests
 
 from amweekly.shares.models import MetaURL, Share
 
 logger = logging.getLogger(__name__)
 
 
+FACEBOOK_OAUTH_URL = 'https://graph.facebook.com/oauth/access_token'
+
+
 def get_facebook_access_token():
     if settings.FACEBOOK_CLIENT_ID is '' or \
        settings.FACEBOOK_CLIENT_SECRET is '':
         raise ImproperlyConfigured(
-            'Facebook client id and secret not configured.')
+            'FACEBOOK_CLIENT_ID or FACEBOOK_CLIENT_SECRET not configured')
 
     facebook_access_token = cache.get('facebook_access_token')
     if facebook_access_token is None:
-        access_token_request = urlopen(
-            'https://graph.facebook.com/oauth/access_token?client_id={}&client_secret={}&grant_type=client_credentials'.format(  #noqa
-                settings.FACEBOOK_CLIENT_ID, settings.FACEBOOK_CLIENT_SECRET))
-        if access_token_request.status is 200:
-            text_response = access_token_request.read().decode('utf-8')
-            # text_response is formatted like access_token=foo
-            facebook_access_token = text_response.split('=')[1]
+        logger.info('Requesting access token from Facebook')
+
+        try:
+            access_token_request = requests.get(FACEBOOK_OAUTH_URL, params={
+                'client_id': settings.FACEBOOK_CLIENT_ID,
+                'client_secret': settings.FACEBOOK_CLIENT_SECRET,
+                'grant_type': 'client_credentials'
+            })
+            access_token_request.raise_for_status()
+            facebook_access_token = access_token_request.text.split('=')[1]
             cache.set('facebook_access_token', facebook_access_token, 3600)
-        else:
+            logger.info('Facebook access token retrieved successfully')
+        except requests.exceptions.HTTPError as e:
             raise ImproperlyConfigured(
-                'Facebook client id and secret are invalid.')
+                'Unable to retrieve Facebook access token: {}'.format(str(e)))
+
     return facebook_access_token
 
 
