@@ -21,7 +21,8 @@ def get_facebook_access_token():
         raise ImproperlyConfigured(
             'FACEBOOK_CLIENT_ID or FACEBOOK_CLIENT_SECRET not configured')
 
-    facebook_access_token = cache.get('facebook_access_token')
+    facebook_access_token = cache.get('shares.jobs.facebook_access_token')
+
     if facebook_access_token is None:
         logger.info('Requesting access token from Facebook')
 
@@ -33,7 +34,7 @@ def get_facebook_access_token():
             })
             access_token_request.raise_for_status()
             facebook_access_token = access_token_request.text.split('=')[1]
-            cache.set('facebook_access_token', facebook_access_token, 3600)
+            cache.set('shares.jobs.facebook_access_token', facebook_access_token, 3600)  # noqa
             logger.info('Facebook access token retrieved successfully')
         except requests.exceptions.HTTPError as e:
             raise ImproperlyConfigured(
@@ -64,9 +65,11 @@ def get_og_object(lookup):
     og = graph.get_object(lookup)
     og_url = og['id']  # url as recognized by the open graph
     og_object = None
+
     if og_url is not None:
         if 'og_object' in og:
             og_object = og['og_object']
+
     return (og_url, og_object)
 
 
@@ -75,7 +78,6 @@ def refresh_share_meta_url(share_id):
         share = Share.objects.get(pk=share_id)
         og_url, og_object = get_og_object(share.url)
         meta_url, created = MetaURL.objects.get_or_create(og_url=og_url)
-
         refresh_meta_url(meta_url.id)
     except Share.DoesNotExist:
         logger.error('Share with id {} does not exist.'.format(share_id))
