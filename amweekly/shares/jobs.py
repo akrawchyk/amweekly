@@ -24,8 +24,7 @@ def get_facebook_access_token():
     facebook_access_token = cache.get('shares.jobs.facebook_access_token')
 
     if facebook_access_token is None:
-        logger.info('Requesting access token from Facebook')
-
+        logger.info('Requesting access token from Facebook...')
         try:
             access_token_request = requests.get(FACEBOOK_OAUTH_URL, params={
                 'client_id': settings.FACEBOOK_CLIENT_ID,
@@ -45,8 +44,8 @@ def get_facebook_access_token():
 
 def get_og_object(lookup):
     """
-    Expected Graph API Response
-        {
+    Expected Graph API Response:
+    {
         "og_object": {
             "id": "10150192219203164",
             "title": "https://developers.facebook.com/tools/explorer/",
@@ -58,7 +57,7 @@ def get_og_object(lookup):
             "share_count": 2572
         },
         "id": "https://developers.facebook.com/tools/explorer/"
-        }
+    }
     """
     facebook_access_token = get_facebook_access_token()
     graph = facebook.GraphAPI(facebook_access_token)
