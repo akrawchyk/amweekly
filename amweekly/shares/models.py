@@ -1,4 +1,5 @@
 from django.db import models
+from django.template.defaultfilters import truncatechars
 from django.utils import timezone
 
 
@@ -15,6 +16,10 @@ class MetaURL(models.Model):
             return self.og_title
         else:
             return self.created_at
+
+    @property
+    def short_description(self):
+        return truncatechars(self.og_description, 140)
 
 
 class Share(models.Model):
@@ -34,7 +39,7 @@ class Share(models.Model):
         return '{} on {}'.format(self.user_name, self.created_at)
 
     @property
-    def get_title_display(self):
+    def title_display(self):
         if self.title:
             return self.title
         elif self.meta_url.og_title:
