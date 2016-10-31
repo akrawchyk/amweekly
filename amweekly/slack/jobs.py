@@ -26,15 +26,17 @@ def process_slash_command_webhook(webhook_transaction_id):
             command=webhook_transaction.body.get('command'),
             text=webhook_transaction.body.get('text'),
             response_url=webhook_transaction.body.get('response_url'),
-            webhook_transaction=webhook_transaction
-        )
+            webhook_transaction=webhook_transaction)
 
         logger.info('SlashCommand {} processed', slash_command.id)
 
+        # TODO
+        # command registry used to decouple shares from the slack app
+        #  * call functions based on slack's command with text as input
+        #  * use argparse to allow passing argyuments
         Share.objects.create(
             user_name=slash_command.user_name,
-            url=slash_command.text
-        )
+            url=slash_command.text)
 
         webhook_transaction.status = WebhookTransaction.PROCESSED
         webhook_transaction.integration = slash_command
@@ -55,14 +57,11 @@ def process_incoming_webhook(incoming_webhook_id):
     try:
         incoming_webhook = IncomingWebhook.objects.get(pk=incoming_webhook_id)
         headers = {
-            'Content-type': 'application/json'
-        }
+            'Content-type': 'application/json', }
         message = {
-            'text': incoming_webhook.text
-        }
+            'text': incoming_webhook.text, }
         kwargs = {
-            'headers': headers,
-        }
+            'headers': headers, }
 
         if incoming_webhook.username:
             message['username'] = incoming_webhook.username
@@ -75,14 +74,12 @@ def process_incoming_webhook(incoming_webhook_id):
         webhook_transaction = WebhookTransaction.objects.create(
             body=message,
             headers=kwargs['headers'],
-            integration=incoming_webhook
-        )
+            integration=incoming_webhook)
 
         try:
             r = requests.post(
                 incoming_webhook.webhook_url,
-                **kwargs
-            )
+                **kwargs)
             r.raise_for_status()
             webhook_transaction.status = WebhookTransaction.PROCESSED
             webhook_transaction.save()

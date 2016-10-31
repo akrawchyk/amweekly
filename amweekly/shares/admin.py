@@ -5,7 +5,7 @@ from import_export.admin import ImportExportModelAdmin
 import django_rq
 
 from amweekly.shares.models import Share, MetaURL
-from amweekly.shares.jobs import refresh_meta_url_for_share, refresh_meta_url
+from amweekly.shares.jobs import hydrate_share_meta_url, refresh_meta_url
 
 
 class ShareResource(resources.ModelResource):
@@ -14,25 +14,30 @@ class ShareResource(resources.ModelResource):
         model = Share
 
 
-def refresh_share_metas(modeladmin, request, queryset):
-    shares = queryset[:5]
+def refresh_share_meta_urls(modeladmin, request, queryset):
+    shares = queryset
     for share in shares:
-        django_rq.enqueue(refresh_meta_url_for_share, share.id)
-refresh_share_metas.short_description = 'Refresh OpenGraph data (max 5)'
+        django_rq.enqueue(hydrate_share_meta_url, share.id)
+refresh_share_meta_urls.short_description = 'Refresh OpenGraph data'
 
 
 @admin.register(Share)
 class ShareAdmin(ImportExportModelAdmin):
-    actions = [refresh_share_metas]
+    actions = [refresh_share_meta_urls]
+    fields = ('url', 'user_name', 'title')
+    list_display = ('user_name', 'url', 'created_at', 'updated_at', 'meta_url')
+    list_filter = ('user_name', )
 
 
-def refresh_metas(modeladmin, request, queryset):
-    meta_urls = queryset[:5]
+def refresh_meta_urls(modeladmin, request, queryset):
+    meta_urls = queryset
     for meta_url in meta_urls:
         django_rq.enqueue(refresh_meta_url, meta_url.id)
-refresh_metas.short_description = 'Refresh OpenGraph data (max 5)'
+refresh_meta_urls.short_description = 'Refresh OpenGraph data'
 
 
 @admin.register(MetaURL)
 class MetaURLAdmin(admin.ModelAdmin):
-    actions = [refresh_metas]
+    actions = [refresh_meta_urls]
+    fields = ('og_title', 'og_description')
+    list_display = ('og_title', 'short_description', 'created_at', 'updated_at')
