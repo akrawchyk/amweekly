@@ -7,15 +7,14 @@ class MetaURL(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     og_title = models.CharField(blank=True, max_length=255)
     og_description = models.TextField(blank=True)
-    og_id = models.CharField(blank=True, max_length=255)
+    og_id = models.CharField(unique=True, max_length=255)
     og_type = models.CharField(blank=True, max_length=255)
-    og_url = models.URLField()
 
     def __str__(self):
         if self.og_title != '':
             return self.og_title
         else:
-            return self.og_url
+            return self.created_at
 
 
 class Share(models.Model):
@@ -26,10 +25,10 @@ class Share(models.Model):
     description = models.TextField(blank=True)
     url = models.URLField()
     meta_url = models.ForeignKey(
-        'MetaURL',
-        on_delete=models.CASCADE,
+        MetaURL,
         blank=True,
-        null=True)
+        null=True,
+        on_delete=models.CASCADE)
 
     def __str__(self):
         return '{} on {}'.format(self.user_name, self.created_at)

@@ -3,13 +3,10 @@ from django.dispatch import receiver
 
 import django_rq
 
-from amweekly.shares.models import Share, MetaURL
-from amweekly.shares.jobs import refresh_meta_url
+from amweekly.shares.models import Share
+from amweekly.shares.jobs import hydrate_share_meta_url
 
 
-@receiver(post_save, sender=Share, dispatch_uid='refresh_meta_url_for_share')
-def refresh_meta_url_for_share(sender, instance, **kwargs):
-    meta_url, created = MetaURL.objects.get_or_create(og_url=instance.url)
-    if created:
-        meta_url.share_set.add(instance)
-    django_rq.enqueue(refresh_meta_url, meta_url.id)
+@receiver(post_save, sender=Share, dispatch_uid='hydrate_meta_url_for_share')
+def hydrate_meta_url_for_share(sender, instance, **kwargs):
+    django_rq.enqueue(hydrate_share_meta_url, instance.id)

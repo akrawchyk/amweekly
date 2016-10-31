@@ -1,83 +1,92 @@
 import logging
 
-from django.conf import settings
 from django.core.cache import cache
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 import facebook
-import requests
 
 from amweekly.shares.models import MetaURL, Share
 
 logger = logging.getLogger(__name__)
 
+CACHE_APP_ACCESS_TOKEN = 'shares.jobs.app_access_token'
 
-FACEBOOK_OAUTH_URL = 'https://graph.facebook.com/oauth/access_token'
+"""
+Expected Graph API Response:
+{
+    "og_object": {
+        "id": "1015012577744568"
+        "type": "fitness.course",
+        "url": "http://www.example.com/route3875037.html",
+        "description": "New personal best!",
+        "title": "My Run",
+        "image": "http://www.example.com/screencap.png”
+    }
+}
+"""
 
 
-def get_facebook_access_token():
+def get_og_object(url=None, id=None):
     if settings.FACEBOOK_CLIENT_ID is '' or \
        settings.FACEBOOK_CLIENT_SECRET is '':
         raise ImproperlyConfigured(
             'FACEBOOK_CLIENT_ID or FACEBOOK_CLIENT_SECRET not configured')
 
-    facebook_access_token = cache.get('shares.jobs.facebook_access_token')
+    app_access_token = cache.get(CACHE_APP_ACCESS_TOKEN)
 
-    if facebook_access_token is None:
-        logger.info('Requesting access token from Facebook...')
-        try:
-            access_token_request = requests.get(FACEBOOK_OAUTH_URL, params={
-                'client_id': settings.FACEBOOK_CLIENT_ID,
-                'client_secret': settings.FACEBOOK_CLIENT_SECRET,
-                'grant_type': 'client_credentials'
-            })
-            access_token_request.raise_for_status()
-            facebook_access_token = access_token_request.text.split('=')[1]
-            cache.set('shares.jobs.facebook_access_token', facebook_access_token, 3600)  # noqa
-            logger.info('Facebook access token retrieved successfully')
-        except requests.exceptions.HTTPError as e:
-            raise ImproperlyConfigured(
-                'Unable to retrieve Facebook access token: {}'.format(str(e)))
+    if app_access_token is None:
+        app_access_token = facebook.GraphAPI().get_app_access_token(
+            settings.FACEBOOK_CLIENT_ID,
+            settings.FACEBOOK_CLIENT_SECRET)
+        cache.set(CACHE_APP_ACCESS_TOKEN, app_access_token, 3600)
+        print(app_access_token)
 
-    return facebook_access_token
+    graph = facebook.GraphAPI(app_access_token)
 
+    if id is not None:
+        og = graph.get_object(id=id)
+    elif url is not None:
+        og = graph.get_object(url)
+    else:
+        raise Exception('Expected either url or id as kwargs')
 
-def get_og_object(lookup):
-    """
-    Expected Graph API Response:
-    {
-        "og_object": {
-            "id": "10150192219203164",
-            "title": "https://developers.facebook.com/tools/explorer/",
-            "type": "website",
-            "updated_time": "2016-08-18T06:55:10+0000"
-        },
-        "share": {
-            "comment_count": 4,
-            "share_count": 2572
-        },
-        "id": "https://developers.facebook.com/tools/explorer/"
-    }
-    """
-    facebook_access_token = get_facebook_access_token()
-    graph = facebook.GraphAPI(facebook_access_token)
-    og = graph.get_object(lookup)
-    og_url = og['id']  # url as recognized by the open graph
     og_object = None
 
-    if og_url is not None:
-        if 'og_object' in og:
-            og_object = og['og_object']
+    if 'og_object' in og:
+        og_object = og['og_object']
+    else:
+        lookup = id if id is not None else url
+        logger.error('No Open Graph object found for {}'.format(lookup))
 
-    return (og_url, og_object)
+    return og_object
 
 
-def refresh_share_meta_url(share_id):
+def hydrate_share_meta_url(share_id):
     try:
         share = Share.objects.get(pk=share_id)
-        og_url, og_object = get_og_object(share.url)
-        meta_url, created = MetaURL.objects.get_or_create(og_url=og_url)
-        refresh_meta_url(meta_url.id)
+        og_object = get_og_object(share.url)
+
+        if og_object['id'] is None:
+            raise Exception('No Open Graph object returned for {}'.format(
+                share.url))
+
+        meta_url, created = MetaURL.objects.get_or_create(og_id=og_object['id'])  # noqa
+
+        for k, v in og_object.items():
+            if k == 'title':
+                meta_url.og_title = v
+            if k == 'description':
+                meta_url.og_description = v
+            if k == 'type':
+                meta_url.og_type = v
+            if k == 'id':
+                meta_url.og_id = v
+
+        meta_url.save()
+        if created:
+            share.meta_url = meta_url
+            share.save()
     except Share.DoesNotExist:
         logger.error('Share with id {} does not exist.'.format(share_id))
 
@@ -85,7 +94,7 @@ def refresh_share_meta_url(share_id):
 def refresh_meta_url(meta_url_id):
     try:
         meta_url = MetaURL.objects.get(pk=meta_url_id)
-        og_url, og_object = get_og_object(meta_url.og_url)
+        og_object = get_og_object(id=meta_url.og_id)
 
         if og_object is not None:
             for k, v in og_object.items():
