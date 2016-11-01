@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class SharesConfig(AppConfig):
-    name = 'shares'
+class SlackConfig(AppConfig):
+    name = 'slack'

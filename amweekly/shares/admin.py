@@ -24,6 +24,7 @@ refresh_share_meta_urls.short_description = 'Refresh OpenGraph data'
 @admin.register(Share)
 class ShareAdmin(ImportExportModelAdmin):
     actions = [refresh_share_meta_urls]
+    date_hierarchy = 'updated_at'
     fields = ('url', 'user_name', 'title')
     list_display = ('user_name', 'url', 'created_at', 'updated_at', 'meta_url')
     list_filter = ('user_name', )
@@ -39,5 +40,6 @@ refresh_meta_urls.short_description = 'Refresh OpenGraph data'
 @admin.register(MetaURL)
 class MetaURLAdmin(admin.ModelAdmin):
     actions = [refresh_meta_urls]
+    date_hierarchy = 'updated_at'
     fields = ('og_title', 'og_description')
     list_display = ('og_title', 'short_description', 'created_at', 'updated_at')

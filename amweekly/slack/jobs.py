@@ -1,9 +1,7 @@
 import json
 import logging
 
-from amweekly.slack.models import WebhookTransaction, SlashCommand, \
-    IncomingWebhook
-from amweekly.shares.models import Share
+from amweekly.slack.apps import SlackConfig
 
 import requests
 
@@ -11,10 +9,12 @@ logger = logging.getLogger(__name__)
 
 
 def process_slash_command_webhook(webhook_transaction_id):
+    WebhookTransaction = SlackConfig.get_model('WebhookTransaction')
     webhook_transaction = WebhookTransaction.objects.get(
         pk=webhook_transaction_id)
 
     try:
+        SlashCommand = SlackConfig.get_model('SlashCommand')
         slash_command = SlashCommand.objects.create(
             token=webhook_transaction.body.get('token'),
             team_id=webhook_transaction.body.get('team_id'),
@@ -28,19 +28,10 @@ def process_slash_command_webhook(webhook_transaction_id):
             response_url=webhook_transaction.body.get('response_url'),
             webhook_transaction=webhook_transaction)
 
-        logger.info('SlashCommand {} processed', slash_command.id)
-
-        # TODO
-        # command registry used to decouple shares from the slack app
-        #  * call functions based on slack's command with text as input
-        #  * use argparse to allow passing argyuments
-        Share.objects.create(
-            user_name=slash_command.user_name,
-            url=slash_command.text)
-
         webhook_transaction.status = WebhookTransaction.PROCESSED
         webhook_transaction.integration = slash_command
         webhook_transaction.save()
+        slash_command.save()
         log = 'SlashCommand {} processed successfully'.format(
             slash_command.id)
         logger.info(log)
@@ -55,6 +46,7 @@ def process_slash_command_webhook(webhook_transaction_id):
 
 def process_incoming_webhook(incoming_webhook_id):
     try:
+        IncomingWebhook = SlackConfig.get_model('IncomingWebhook')
         incoming_webhook = IncomingWebhook.objects.get(pk=incoming_webhook_id)
         headers = {
             'Content-type': 'application/json', }
@@ -71,6 +63,7 @@ def process_incoming_webhook(incoming_webhook_id):
 
         kwargs['data'] = json.dumps(message)
 
+        WebhookTransaction = SlackConfig.get_model('WebhookTransaction')
         webhook_transaction = WebhookTransaction.objects.create(
             body=message,
             headers=kwargs['headers'],
