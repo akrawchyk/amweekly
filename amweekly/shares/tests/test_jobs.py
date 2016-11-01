@@ -27,9 +27,10 @@ def test_get_og_object_caches_app_access_token():
     assert app_access_token is not None
 
 
-# def test_hydrate_share_meta_url(share_factory):
-#     share = share_factory(url='http://facebook.com')
-#     share.save()
-#     hydrate_share_meta_url(share.id)
-#     meta_url = share.meta_url
-#     assert 'Facebook' in meta_url.og_title
+@pytest.mark.django_db
+def test_hydrate_share_meta_url(share_factory):
+    share = share_factory(url='http://facebook.com')
+    share.save()
+    hydrate_share_meta_url(share.id)
+    meta_url = share.meta_url
+    assert 'Facebook' in meta_url['og_title']

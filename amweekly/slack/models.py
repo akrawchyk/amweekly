@@ -51,12 +51,17 @@ class BaseSchedulable(models.Model):
     crontab = models.CharField(max_length=255)
     repeat = models.BooleanField(default=False)
 
-    def clean(self):
+    class Meta:
+        abstract = True
+
+    # TODO crontab validator? thanks solomon
+    def clean(self, *args, **kwargs):
         try:
             CronTab(self.crontab)
         except:
             raise ValidationError(_('Unrecognized crontab `{}`').format(
                 self.crontab))
+        super(BaseSchedulable, self).clean(*args, **kwargs)
 
 
 class WebhookTransaction(BaseTransaction, models.Model):
