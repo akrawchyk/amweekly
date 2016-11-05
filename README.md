@@ -1,19 +1,7 @@
 # amweekly
 
+![Travis CI build status](https://api.travis-ci.org/akrawchyk/amweekly.svg?branch=master)
 
-
----
-
-**Congratulations on your new mo-django project!**
-
-Below you will find instructions on how to bootstrap the project.
-This README should be updated to reflect the current state of the project,
-with any additions or modifications to the setup procedures or other items
-of note.
-
-**Now just delete this block and let's get going!**
-
----
 
 ## Developing
 
