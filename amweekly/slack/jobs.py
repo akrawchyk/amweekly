@@ -1,9 +1,8 @@
 import json
 import logging
 
-# from django.apps import AppConfig
-
-from amweekly.slack.models import IncomingWebhook, SlashCommand, WebhookTransaction
+from amweekly.slack.models import IncomingWebhook, SlashCommand, \
+    WebhookTransaction
 
 import requests
 
@@ -11,12 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 def process_slash_command_webhook(webhook_transaction_id):
-    # WebhookTransaction = AppConfig.get_model('slack.WebhookTransaction')
     webhook_transaction = WebhookTransaction.objects.get(
         pk=webhook_transaction_id)
 
     try:
-        # SlashCommand = AppConfig.get_model('slack.SlashCommand')
         slash_command = SlashCommand.objects.create(
             token=webhook_transaction.body.get('token'),
             team_id=webhook_transaction.body.get('team_id'),
@@ -47,7 +44,6 @@ def process_slash_command_webhook(webhook_transaction_id):
 
 def process_incoming_webhook(incoming_webhook_id):
     try:
-        # IncomingWebhook = AppConfig.get_model('slack.IncomingWebhook')
         incoming_webhook = IncomingWebhook.objects.get(pk=incoming_webhook_id)
         headers = {
             'Content-type': 'application/json', }
@@ -64,7 +60,6 @@ def process_incoming_webhook(incoming_webhook_id):
 
         kwargs['data'] = json.dumps(message)
 
-        # WebhookTransaction = AppConfig.get_model('slack.WebhookTransaction')
         webhook_transaction = WebhookTransaction.objects.create(
             body=message,
             headers=kwargs['headers'],

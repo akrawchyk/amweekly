@@ -18,6 +18,8 @@ def refresh_share_meta_urls(modeladmin, request, queryset):
     shares = queryset
     for share in shares:
         django_rq.enqueue(hydrate_share_meta_url, share.id)
+
+
 refresh_share_meta_urls.short_description = 'Refresh OpenGraph data'
 
 
@@ -34,6 +36,8 @@ def refresh_meta_urls(modeladmin, request, queryset):
     meta_urls = queryset
     for meta_url in meta_urls:
         django_rq.enqueue(refresh_meta_url, meta_url.id)
+
+
 refresh_meta_urls.short_description = 'Refresh OpenGraph data'
 
 
