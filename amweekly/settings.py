@@ -197,9 +197,11 @@ if SENTRY_DSN:
 
 # Facebook
 
-FACEBOOK_CLIENT_ID = config('FACEBOOK_CLIENT_ID', default='')
-FACEBOOK_CLIENT_SECRET = config('FACEBOOK_CLIENT_SECRET', default='')
+FACEBOOK_APP_ID = config('FACEBOOK_APP_ID', default='')
+FACEBOOK_APP_SECRET = config('FACEBOOK_APP_SECRET', default='')
 
 # Slack
 
-SLACK_TOKENS=config('SLACK_TOKENS', cast=lambda v: [s.strip() for s in v.split(',')])  #noqa
+SLACK_TOKENS = config('SLACK_TOKENS',
+                      default='',
+                      cast=lambda v: [s.strip() for s in v.split(',')])

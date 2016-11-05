@@ -28,8 +28,8 @@ Expected Graph API Response:
 
 
 def get_og_object(url=None, id=None):
-    if settings.FACEBOOK_CLIENT_ID is '' or \
-       settings.FACEBOOK_CLIENT_SECRET is '':
+    if settings.FACEBOOK_APP_ID is '' or \
+       settings.FACEBOOK_APP_SECRET is '':
         raise ImproperlyConfigured(
             'FACEBOOK_CLIENT_ID or FACEBOOK_CLIENT_SECRET not configured')
 
@@ -37,8 +37,8 @@ def get_og_object(url=None, id=None):
 
     if app_access_token is None:
         app_access_token = facebook.GraphAPI().get_app_access_token(
-            settings.FACEBOOK_CLIENT_ID,
-            settings.FACEBOOK_CLIENT_SECRET)
+            settings.FACEBOOK_APP_ID,
+            settings.FACEBOOK_APP_SECRET)
         cache.set(CACHE_APP_ACCESS_TOKEN, app_access_token, 3600)
         print(app_access_token)
 
@@ -71,7 +71,8 @@ def hydrate_share_meta_url(share_id):
             raise Exception('No Open Graph object returned for {}'.format(
                 share.url))
 
-        meta_url, created = MetaURL.objects.get_or_create(og_id=og_object['id'])  # noqa
+        meta_url, created = MetaURL.objects.get_or_create(
+            og_id=og_object['id'])
 
         for k, v in og_object.items():
             if k == 'title':
@@ -83,10 +84,8 @@ def hydrate_share_meta_url(share_id):
             if k == 'id':
                 meta_url.og_id = v
 
+        meta_url.share_set.add(share)
         meta_url.save()
-        if created:
-            share.meta_url = meta_url
-            share.save()
     except Share.DoesNotExist:
         logger.error('Share with id {} does not exist.'.format(share_id))
 

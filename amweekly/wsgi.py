@@ -1,9 +1,11 @@
 import os
-os.environ.setdefault(
-    "DJANGO_SETTINGS_MODULE", "amweekly.settings")
 
 from django.core.wsgi import get_wsgi_application
 from whitenoise.django import DjangoWhiteNoise
+
+os.environ.setdefault(
+    "DJANGO_SETTINGS_MODULE", "amweekly.settings")
+
 
 public_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'public')

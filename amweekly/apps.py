@@ -6,4 +6,9 @@ class AmweeklyConfig(AppConfig):
 
     def ready(self):
         import amweekly.shares.signals  # noqa
-        import amweekly.slack.signals  # noqa
+        import amweekly.signals  # noqa
+
+        # IncomingWebhook = self.get_model('IncomingWebhook')
+
+        # find enabled jobs that have no job id
+        # scheduled them

@@ -18,14 +18,17 @@ def refresh_share_meta_urls(modeladmin, request, queryset):
     shares = queryset
     for share in shares:
         django_rq.enqueue(hydrate_share_meta_url, share.id)
+
+
 refresh_share_meta_urls.short_description = 'Refresh OpenGraph data'
 
 
 @admin.register(Share)
 class ShareAdmin(ImportExportModelAdmin):
     actions = [refresh_share_meta_urls]
+    date_hierarchy = 'updated_at'
     fields = ('url', 'user_name', 'title')
-    list_display = ('user_name', 'url', 'created_at', 'updated_at', 'meta_url')
+    list_display = ('user_name', 'url', 'meta_url', 'created_at', 'updated_at')
     list_filter = ('user_name', )
 
 
@@ -33,11 +36,16 @@ def refresh_meta_urls(modeladmin, request, queryset):
     meta_urls = queryset
     for meta_url in meta_urls:
         django_rq.enqueue(refresh_meta_url, meta_url.id)
+
+
 refresh_meta_urls.short_description = 'Refresh OpenGraph data'
 
 
 @admin.register(MetaURL)
 class MetaURLAdmin(admin.ModelAdmin):
     actions = [refresh_meta_urls]
-    fields = ('og_title', 'og_description')
-    list_display = ('og_title', 'short_description', 'created_at', 'updated_at')
+    date_hierarchy = 'updated_at'
+    fields = ('og_title', 'og_description', 'og_type')
+    list_display = ('og_title', 'short_description', 'og_type', 'created_at',
+                    'updated_at')
+    list_filter = ('og_type', )
