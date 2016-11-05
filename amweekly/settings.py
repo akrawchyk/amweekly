@@ -202,4 +202,6 @@ FACEBOOK_CLIENT_SECRET = config('FACEBOOK_CLIENT_SECRET', default='')
 
 # Slack
 
-SLACK_TOKENS=config('SLACK_TOKENS', cast=lambda v: [s.strip() for s in v.split(',')])  #noqa
+SLACK_TOKENS = config('SLACK_TOKENS',
+                      default='',
+                      cast=lambda v: [s.strip() for s in v.split(',')])

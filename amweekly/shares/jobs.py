@@ -71,7 +71,8 @@ def hydrate_share_meta_url(share_id):
             raise Exception('No Open Graph object returned for {}'.format(
                 share.url))
 
-        meta_url, created = MetaURL.objects.get_or_create(og_id=og_object['id'])  # noqa
+        meta_url, created = MetaURL.objects.get_or_create(
+            og_id=og_object['id'])
 
         for k, v in og_object.items():
             if k == 'title':
