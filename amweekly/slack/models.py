@@ -1,6 +1,6 @@
-from datetime import datetime, timedelta
 import logging
 
+from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey, \
     GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -10,8 +10,6 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 import django_rq
-
-from amweekly.slack.jobs import process_incoming_webhook
 
 from crontab import CronTab
 
@@ -100,6 +98,13 @@ class SlashCommand(models.Model):
     text = models.CharField(max_length=255)
     response_url = models.URLField()
 
+    def save(self, *args, **kwargs):
+        # ensure token is recognized
+        if self.token not in settings.SLACK_TOKENS:
+            raise ValidationError('Unrecognized Slack token')
+
+        super(SlashCommand, self).save(*args, **kwargs)
+
 
 class IncomingWebhook(BaseSchedulable, models.Model):
     """
@@ -117,31 +122,21 @@ class IncomingWebhook(BaseSchedulable, models.Model):
     username = models.CharField(max_length=255, blank=True)
     icon_emoji = models.CharField(max_length=255, blank=True)
     icon_url = models.URLField(blank=True)
-    scheduled_for = models.DateTimeField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         scheduler = django_rq.get_scheduler('default')
         job_ids = [j.id for j in scheduler.get_jobs()]
 
         # check if we need to unschedule
         if self.job_id and self.job_id in job_ids:
             if not self.enabled:
-                scheduler.cancel(self.job_id)
-                self.job_id = ''
-                self.scheduled_for = None
-                logger.info('Deleted job {}'.format(self.job_id))
+                self.unschedule(scheduler)
 
         # check if we need to schedule
         if self.enabled and not self.job_id:
-            schedule_for = self.get_next_scheduled()
-            job = scheduler.enqueue_at(
-                schedule_for,
-                process_incoming_webhook,
-                self.id)
-            self.job_id = job.id
-            self.scheduled_for = schedule_for
-            logger.info('IncomingWebhook {} is scheduled for {}'.format(
-                self.id, schedule_for))
+            self.schedule(scheduler)
 
         super(IncomingWebhook, self).save(*args, **kwargs)
 
@@ -149,8 +144,26 @@ class IncomingWebhook(BaseSchedulable, models.Model):
     def scheduled(self):
         return self.job_id is not ''
 
-    def get_next_scheduled(self):
-        next = CronTab(self.crontab).next()
-        return datetime.now() + timedelta(seconds=next)
+    def schedule(self, scheduler):
+        from amweekly.slack.jobs import process_incoming_webhook
+        repeat = 0
+        if self.repeat:
+            repeat = None
+
+        job = scheduler.cron(
+            self.crontab,
+            func=process_incoming_webhook,
+            args=[self.id],
+            repeat=repeat,
+            queue_name='default')
+        self.job_id = job.id
+        logger.info(_('IncomingWebhook {} is scheduled for {}').format(
+            self.id))
+
+    def unschedule(self, scheduler):
+        scheduler.cancel(self.job_id)
+        self.job_id = ''
+        logger.info(_('Cancelled IncomingWebhook job {}').format(self.job_id))
+
 
 # TODO make a scheduled class for recovering after shutdown for repeatable

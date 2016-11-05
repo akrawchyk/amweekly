@@ -4,10 +4,10 @@ import pytest
 
 
 @pytest.fixture
-def meta_url_factory():
+def meta_url():
     return MetaURLFactory()
 
 
 @pytest.fixture
-def share_factory():
-    return ShareFactory
+def share():
+    return ShareFactory()

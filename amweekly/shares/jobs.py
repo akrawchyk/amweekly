@@ -83,10 +83,8 @@ def hydrate_share_meta_url(share_id):
             if k == 'id':
                 meta_url.og_id = v
 
+        meta_url.share_set.add(share)
         meta_url.save()
-        if created:
-            share.meta_url = meta_url
-            share.save()
     except Share.DoesNotExist:
         logger.error('Share with id {} does not exist.'.format(share_id))
 

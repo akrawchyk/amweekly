@@ -1,6 +1,11 @@
 from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 
+from amweekly.shares.tests.factories import ShareFactory
+
+from django.db.models.signals import post_save
+
+import factory
 import pytest
 
 from amweekly.shares.jobs import get_og_object, hydrate_share_meta_url, \
@@ -28,9 +33,12 @@ def test_get_og_object_caches_app_access_token():
 
 
 @pytest.mark.django_db
-def test_hydrate_share_meta_url(share_factory):
-    share = share_factory(url='http://facebook.com')
-    share.save()
-    hydrate_share_meta_url(share.id)
-    meta_url = share.meta_url
-    assert 'Facebook' in meta_url['og_title']
+def test_hydrate_share_meta_url():
+    # TODO should be able to put this as a decorator on the factory...
+    with factory.django.mute_signals(post_save):
+        share = ShareFactory(url='http://facebook.com')
+        share.save()
+        hydrate_share_meta_url(share.id)
+        share = ShareFactory(url='http://facebook.com')
+        meta_url = share.meta_url
+        assert 'Facebook' in meta_url.og_title
