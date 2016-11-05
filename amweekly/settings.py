@@ -197,8 +197,8 @@ if SENTRY_DSN:
 
 # Facebook
 
-FACEBOOK_CLIENT_ID = config('FACEBOOK_CLIENT_ID', default='')
-FACEBOOK_CLIENT_SECRET = config('FACEBOOK_CLIENT_SECRET', default='')
+FACEBOOK_APP_ID = config('FACEBOOK_APP_ID', default='')
+FACEBOOK_APP_SECRET = config('FACEBOOK_APP_SECRET', default='')
 
 # Slack
 

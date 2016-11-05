@@ -15,13 +15,13 @@ pytest.mark.integration
 
 
 def test_unconfigured_facebook_client_id(settings):
-    settings.FACEBOOK_CLIENT_ID = ''
+    settings.FACEBOOK_APP_ID = ''
     with pytest.raises(ImproperlyConfigured):
         get_og_object(None)
 
 
 def test_unconfigured_facebook_client_secret(settings):
-    settings.FACEBOOK_CLIENT_SECRET = ''
+    settings.FACEBOOK_APP_SECRET = ''
     with pytest.raises(ImproperlyConfigured):
         get_og_object(None)
 
