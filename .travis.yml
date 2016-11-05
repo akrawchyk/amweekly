@@ -3,8 +3,6 @@ python: "3.5"
 dist: 'trusty'
 sudo: false
 group: beta
-services:
-  - postgresql
 addons:
   postgresql: "9.4"
 before_install: "pip install pylama && pylama amweekly/** --skip */migrations/*"
