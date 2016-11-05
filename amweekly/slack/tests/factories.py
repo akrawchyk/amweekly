@@ -1,3 +1,5 @@
+from amweekly.slack.models import WebhookTransaction
+
 from django.db.models.signals import post_save
 
 from factory import Faker
@@ -8,7 +10,7 @@ class WebhookTransactionFactory(DjangoModelFactory):
     class Meta:
         model = 'slack.WebhookTransaction'
 
-    status = 1  # UNPROCESSED
+    status = WebhookTransaction.UNPROCESSED
     body = {}
     headers = {}
 

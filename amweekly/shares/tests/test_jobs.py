@@ -1,15 +1,14 @@
 from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
-
-from amweekly.shares.tests.factories import ShareFactory
-
 from django.db.models.signals import post_save
-
-import factory
-import pytest
 
 from amweekly.shares.jobs import get_og_object, hydrate_share_meta_url, \
     CACHE_APP_ACCESS_TOKEN
+from amweekly.shares.tests.factories import ShareFactory
+
+
+import factory
+import pytest
 
 pytest.mark.integration
 
