@@ -1,5 +1,6 @@
 from amweekly.slack.tests.factories import SlashCommandFactory, \
-    IncomingWebhookFactory, WebhookTransactionFactory
+    IncomingWebhookFactory, WebhookTransactionFactory, \
+    SlashCommandWebhookTransactionFactory
 
 import pytest
 
@@ -17,3 +18,8 @@ def incoming_webhook():
 @pytest.fixture
 def webhook_transaction():
     return WebhookTransactionFactory()
+
+
+@pytest.fixture
+def slash_command_webhook_transaction():
+    return SlashCommandWebhookTransactionFactory()

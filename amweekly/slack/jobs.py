@@ -30,14 +30,13 @@ def process_slash_command_webhook(webhook_transaction_id):
         webhook_transaction.status = WebhookTransaction.PROCESSED
         webhook_transaction.integration = slash_command
         webhook_transaction.save()
-        log = 'SlashCommand {} processed successfully'.format(
-            slash_command.id)
+        log = 'SlashCommand {} processed successfully'.format(slash_command.id)
         logger.info(log)
         return log
     except Exception as e:
         webhook_transaction.status = WebhookTransaction.ERROR
         webhook_transaction.save()
-        log = 'WebhookTransaction {} failed to process: {}'.format(
+        log = 'WebhookTransaction {} failed to process as SlashCommand: {}'.format(  # noqa
             webhook_transaction.id, str(e))
         return log
 

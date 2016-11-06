@@ -31,7 +31,7 @@ def get_og_object(url=None, id=None):
     if settings.FACEBOOK_APP_ID is '' or \
        settings.FACEBOOK_APP_SECRET is '':
         raise ImproperlyConfigured(
-            'FACEBOOK_CLIENT_ID or FACEBOOK_CLIENT_SECRET not configured')
+            'FACEBOOK_APP_ID or FACEBOOK_APP_SECRET not configured')
 
     app_access_token = cache.get(CACHE_APP_ACCESS_TOKEN)
 
@@ -40,7 +40,6 @@ def get_og_object(url=None, id=None):
             settings.FACEBOOK_APP_ID,
             settings.FACEBOOK_APP_SECRET)
         cache.set(CACHE_APP_ACCESS_TOKEN, app_access_token, 3600)
-        print(app_access_token)
 
     graph = facebook.GraphAPI(app_access_token)
 

@@ -2,7 +2,7 @@ from amweekly.slack.models import WebhookTransaction
 
 from django.db.models.signals import post_save
 
-from factory import Faker
+from factory import Faker, lazy_attribute_sequence
 from factory.django import DjangoModelFactory, mute_signals
 
 
@@ -13,6 +13,28 @@ class WebhookTransactionFactory(DjangoModelFactory):
     status = WebhookTransaction.UNPROCESSED
     body = {}
     headers = {}
+
+
+class SlashCommandWebhookTransactionFactory(DjangoModelFactory):
+    class Meta:
+        model = 'slack.WebhookTransaction'
+
+    status = WebhookTransaction.UNPROCESSED
+    headers = {}
+
+    @lazy_attribute_sequence
+    def body(self, n):
+        return {
+            "text": "http://test-url{}.com".format(n),
+            "channel_id": "test_channel_id{}".format(n),
+            "response_url": "https://hooks.slack.com/commands/test/url{}".format(n),  # noqa
+            "user_name": "andrew{}".format(n),
+            "channel_name": "directmessage",
+            "team_domain": "test_domain{}".format(n),
+            "token": "test_token{}".format(n),
+            "team_id": "test_team_id{}".format(n),
+            "command": "/test_command{}".format(n),
+            "user_id": "test_user_id{}".format(n)}
 
 
 @mute_signals(post_save)

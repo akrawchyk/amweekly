@@ -1,3 +1,6 @@
+from django.db.models.signals import post_save
+
+import factory
 import pytest
 
 pytest.mark.unit
@@ -18,10 +21,13 @@ def test_meta_url_short_description(meta_url):
 
 
 @pytest.mark.django_db
-def test_share_title_display(share, meta_url):
-    share.meta_url = meta_url
-    share.save()
+def test_share_title_display_with_title(share):
     assert share.title_display == share.title
+
+
+@pytest.mark.django_db
+def test_share_title_display_without_title(share):
     share.title = ''
-    share.save()
+    with factory.django.mute_signals(post_save):
+        share.save()
     assert share.title_display == share.url

@@ -7,27 +7,19 @@ pytest.mark.integration
 
 
 @pytest.mark.django_db
-def test_process_slash_command_webhook(settings, webhook_transaction):
-    settings.SLACK_TOKENS = 'test_token'
-    webhook_transaction.body = {
-        "text": "http://reddit.com",
-        "channel_id": "test_channel_id",
-        "response_url": "https://hooks.slack.com/commands/test/url",
-        "user_name": "andrew",
-        "channel_name": "directmessage",
-        "team_domain": "isl",
-        "token": "test_token",
-        "team_id": "test_team_id",
-        "command": "/amweekly",
-        "user_id": "test_user_id"}
-    webhook_transaction.save()
-    process_slash_command_webhook(webhook_transaction.id)
-    webhook_transaction.refresh_from_db()
-    assert webhook_transaction.status == WebhookTransaction.PROCESSED
+def test_process_slash_command_webhook(
+        settings, slash_command_webhook_transaction):
+    settings.SLACK_TOKENS = slash_command_webhook_transaction.body.get('token')
+    process_slash_command_webhook(slash_command_webhook_transaction.id)
+    slash_command_webhook_transaction.refresh_from_db()
+    assert slash_command_webhook_transaction.status == \
+        WebhookTransaction.PROCESSED
 
 
 @pytest.mark.django_db
-def test_process_slash_command_webhook_error(webhook_transaction):
-    process_slash_command_webhook(webhook_transaction.id)
-    webhook_transaction.refresh_from_db()
-    assert webhook_transaction.status == WebhookTransaction.ERROR
+def test_process_slash_command_webhook_error(
+        settings, slash_command_webhook_transaction):
+    settings.SLACK_TOKENS = ''
+    process_slash_command_webhook(slash_command_webhook_transaction.id)
+    slash_command_webhook_transaction.refresh_from_db()
+    assert slash_command_webhook_transaction.status == WebhookTransaction.ERROR
