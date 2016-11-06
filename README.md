@@ -1,6 +1,8 @@
 # amweekly
 
-![Travis CI build status](https://api.travis-ci.org/akrawchyk/amweekly.svg?branch=master)
+[![Build Status](https://api.travis-ci.org/akrawchyk/amweekly.svg?branch=master)](https://api.travis-ci.org/akrawchyk/amweekly.svg?branch=master)
+[![Test Coverage](https://codeclimate.com/github/akrawchyk/amweekly/badges/coverage.svg)](https://codeclimate.com/github/akrawchyk/amweekly/coverage)
+[![Code Climate](https://codeclimate.com/github/akrawchyk/amweekly/badges/gpa.svg)](https://codeclimate.com/github/akrawchyk/amweekly)
 
 
 ## Developing
@@ -8,6 +10,8 @@
 ### Requirements
 
 * Python 3
+* Postgresql
+* Redis
 * [foreman](http://ddollar.github.io/foreman/)
 
 ### Python and Django
@@ -18,10 +22,7 @@ First you need to configure your environment:
 cp env.example .env
 ```
 
-Edit *.env* and set the values you need to run the project locally. When you
-start working on the project, run `source .env` or use
-[autoenv](https://github.com/kennethreitz/autoenv) to load the
-environment variables.
+Edit *.env* and set the values you need to run the project locally.
 
 Next, create a Python 3 virtual environment and install the requirements:
 
@@ -64,7 +65,7 @@ First load the virtualenv:
 workon amweekly
 ```
 
-Then use [foreman](http://ddollar.github.io/foreman/) (or [forego](https://github.com/ddollar/forego)) to run the development processes:
+Then use `foreman` to run the development processes:
 
 ```
 foreman start -f Procfile.dev
