@@ -15,7 +15,7 @@ class MetaURL(models.Model):
         if self.og_title != '':
             return self.og_title
         else:
-            return self.created_at
+            return str(self.created_at)
 
     @property
     def short_description(self):

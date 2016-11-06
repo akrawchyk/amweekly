@@ -31,6 +31,7 @@ crontab>=0.21,<0.22
 requests>=2.11,<2.12
 
 pytest>=3.0,<3.1
+pytest-cov>=2.4,<2.5
 pytest-django>=3.0,<3.1
 pytest-httpretty>=0.2,<0.3
 factory_boy>=2.7,<2.8

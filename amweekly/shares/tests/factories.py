@@ -20,6 +20,5 @@ class ShareFactory(DjangoModelFactory):
 
     user_name = Faker('profile', fields='username')
     title = Faker('sentence')
-    description = Faker('paragraph')
+    description = Faker('paragraphs', nb=10)
     url = Faker('url')
-    # meta_url = RelatedFactory(MetaURLFactory, )
