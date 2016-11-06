@@ -3,6 +3,8 @@ python: "3.5"
 dist: 'trusty'
 sudo: false
 group: beta
+services:
+  - redis-server
 addons:
   postgresql: "9.4"
 before_install: "pip install pylama && pylama amweekly/** --skip */migrations/*"

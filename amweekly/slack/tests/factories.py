@@ -1,8 +1,10 @@
-from amweekly.slack.models import WebhookTransaction
+from datetime import datetime, timedelta
 
 from django.db.models.signals import post_save
 
-from factory import Faker, lazy_attribute_sequence
+from amweekly.slack.models import WebhookTransaction
+
+from factory import Faker, lazy_attribute, lazy_attribute_sequence
 from factory.django import DjangoModelFactory, mute_signals
 
 
@@ -58,8 +60,17 @@ class IncomingWebhookFactory(DjangoModelFactory):
     class Meta:
         model = 'slack.IncomingWebhook'
 
+    enabled = False
+    repeat = False
+    job_id = ''
     webhook_url = Faker('url')
     text = Faker('sentence')
     username = Faker('profile', fields='username')
     icon_emoji = ':ghost:'
-    icon_url = None
+    icon_url = ''
+
+    @lazy_attribute
+    def crontab(self):
+        now = datetime.now()
+        future_time = now + timedelta(minutes=10)
+        return '{} * * * *'.format(future_time.minute)
