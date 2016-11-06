@@ -1,13 +1,13 @@
 language: python
-python: "3.5"
-dist: 'trusty'
+python: 3.5
+dist: trusty
 sudo: false
-group: beta
+group: edge
 services:
   - redis-server
 addons:
-  postgresql: "9.4"
-before_install: "pip install pylama && pylama amweekly/** --skip */migrations/*"
-install: "pip install -r requirements.txt"
-script: "pytest"
-after_success: "codeclimate-test-reporter"
+  postgresql: 9.4
+before_install: pip install pylama && pylama amweekly/** --skip */migrations/*
+install: pip install -r requirements.txt
+script: pytest
+after_success: codeclimate-test-reporter
