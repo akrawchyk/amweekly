@@ -2,7 +2,7 @@ import logging
 
 from django.apps import AppConfig
 
-import django_rq
+# import django_rq
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class SlackConfig(AppConfig):
     name = 'slack'
 
-    # TODO https://docs.djangoproject.com/en/1.10/ref/applications/#django.apps.AppConfig.ready
+    # TODO https://docs.djangoproject.com/en/1.10/ref/applications/#django.apps.AppConfig.ready  # noqa
     # def ready(self):
     #     logger.info('slack ready')
     #     IncomingWebhook = self.get_model('IncomingWebhook')
