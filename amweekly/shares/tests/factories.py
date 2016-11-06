@@ -20,5 +20,5 @@ class ShareFactory(DjangoModelFactory):
 
     user_name = Faker('profile', fields='username')
     title = Faker('sentence')
-    description = Faker('paragraphs', nb=10)
+    description = fuzzy.FuzzyText(length=141)
     url = Faker('url')

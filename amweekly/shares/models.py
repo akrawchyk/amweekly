@@ -42,7 +42,5 @@ class Share(models.Model):
     def title_display(self):
         if self.title:
             return self.title
-        elif self.meta_url.og_title:
-            return self.meta_url.og_title
         else:
             return self.url

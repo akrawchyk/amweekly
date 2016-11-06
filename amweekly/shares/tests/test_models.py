@@ -24,7 +24,4 @@ def test_share_title_display(share, meta_url):
     assert share.title_display == share.title
     share.title = ''
     share.save()
-    assert share.title_display == share.meta_url.og_title
-    share.meta_url.og_title = ''
-    share.meta_url.save()
     assert share.title_display == share.url
