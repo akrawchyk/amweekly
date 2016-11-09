@@ -25,7 +25,7 @@ def test_handle_incoming_webhook_schedule_disabled(
 
 
 @pytest.mark.django_db
-def test_handle_incoming_webhook_schedule_reschedule(
+def test_handle_incoming_webhook_schedule_reschedule_crontab(
         incoming_webhook, scheduler):
     incoming_webhook.enabled = True
     incoming_webhook.save()
@@ -37,6 +37,32 @@ def test_handle_incoming_webhook_schedule_reschedule(
     incoming_webhook.save()
     incoming_webhook.refresh_from_db()
     assert incoming_webhook.job_id != old_job_id
+
+
+@pytest.mark.django_db
+def test_handle_incoming_webhook_schedule_reschedule_stale(
+        incoming_webhook, scheduler):
+    incoming_webhook.enabled = True
+    incoming_webhook.save()
+    incoming_webhook.refresh_from_db()
+    old_job_id = incoming_webhook.job_id
+    scheduler.cancel(incoming_webhook.job_id)
+    incoming_webhook.save()
+    incoming_webhook.refresh_from_db()
+    assert incoming_webhook.job_id != old_job_id
+
+
+@pytest.mark.django_db
+def test_handle_incoming_webhook_schedule_remove_orphan_job_id(
+        incoming_webhook, scheduler):
+    incoming_webhook.enabled = True
+    incoming_webhook.save()
+    incoming_webhook.refresh_from_db()
+    scheduler.cancel(incoming_webhook.job_id)
+    incoming_webhook.enabled = False
+    incoming_webhook.save()
+    incoming_webhook.refresh_from_db()
+    assert incoming_webhook.job_id == ''
 
 
 @pytest.mark.django_db
