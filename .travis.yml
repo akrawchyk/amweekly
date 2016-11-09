@@ -1,7 +1,7 @@
 language: python
 python: 3.5
 dist: trusty
-sudo: false
+sudo: required
 group: beta
 services:
   - redis-server
