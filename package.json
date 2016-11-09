@@ -5,7 +5,7 @@
   "scripts": {
     "build": "gulp build:production",
     "dev": "gulp watch",
-    "postinstall": "if [ \"$NODE_ENV\" = \"production\" ]; then npm run build; fi",
+    "postinstall": "if [ \"$NODE_ENV\" == \"production\" ]; then npm run build; fi",
     "tinify": "gulp tinify"
   },
   "author": "ISL",
@@ -45,6 +45,6 @@
   },
   "engines": {
     "npm": "^3",
-    "node": ">=6.3 <7.0"
+    "node": "^6"
   }
 }
