@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 import pytest
 
 pytest.mark.integration
@@ -20,6 +22,21 @@ def test_handle_incoming_webhook_schedule_disabled(
     incoming_webhook.save()
     job_ids = [j.id for j in scheduler.get_jobs()]
     assert incoming_webhook.job_id not in job_ids
+
+
+@pytest.mark.django_db
+def test_handle_incoming_webhook_schedule_reschedule(
+        incoming_webhook, scheduler):
+    incoming_webhook.enabled = True
+    incoming_webhook.save()
+    incoming_webhook.refresh_from_db()
+    old_job_id = incoming_webhook.job_id
+    now = datetime.now()
+    future_time = now + timedelta(minutes=15)
+    incoming_webhook.crontab = '{} * * * *'.format(future_time.minute)
+    incoming_webhook.save()
+    incoming_webhook.refresh_from_db()
+    assert incoming_webhook.job_id != old_job_id
 
 
 @pytest.mark.django_db

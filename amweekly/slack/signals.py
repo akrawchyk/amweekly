@@ -24,6 +24,13 @@ def handle_incoming_webhook_schedule(sender, instance, **kwargs):
             instance.save(update_fields=['job_id'])
             logger.info('Cancelled IncomingWebhook job {}'.format(
                 instance.job_id))
+        else:
+            jobs = scheduler.get_jobs()
+            for job in jobs:
+                if job.id == instance.job_id:
+                    if instance.crontab != job.meta['cron_string']:
+                        scheduler.cancel(job.id)
+                        instance.job_id = ''
 
     # check if we need to schedule
     if instance.enabled and not instance.job_id:
