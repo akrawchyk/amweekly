@@ -16,17 +16,39 @@ def handle_incoming_webhook_schedule(sender, instance, **kwargs):
     scheduler = django_rq.get_scheduler('default')
     job_ids = [j.id for j in scheduler.get_jobs()]
 
-    # check if we need to unschedule
-    if instance.job_id and instance.job_id in job_ids:
-        if not instance.enabled:
+    if not instance.enabled and instance.job_id:
+        # remove schedule
+        if instance.job_id in job_ids:
             scheduler.cancel(instance.job_id)
-            instance.job_id = ''
-            instance.save(update_fields=['job_id'])
             logger.info('Cancelled IncomingWebhook job {}'.format(
                 instance.job_id))
+            instance.job_id = ''
+            instance.save(update_fields=['job_id'])
+        else:
+            logger.info('Removed orphaned IncomingWebhook job {}'.format(
+                instance.job_id))
+            instance.job_id = ''
+            instance.save(update_fields=['job_id'])
 
-    # check if we need to schedule
+    if instance.enabled and instance.job_id:
+        # check if we need to reschedule
+        if instance.job_id not in job_ids:
+            logger.info('Rescheduling stale IncomingWebhook job {}'.format(
+                instance.job_id))
+            instance.job_id = ''
+
+        # check if we've changed our schedule
+        jobs = scheduler.get_jobs()
+        for job in jobs:
+            if job.id == instance.job_id:
+                if instance.crontab != job.meta['cron_string']:
+                    scheduler.cancel(job.id)
+                    logger.info('Rescheduling changed IncomingWebhook job {}'.format(  # noqa
+                        instance.job_id))
+                    instance.job_id = ''
+
     if instance.enabled and not instance.job_id:
+        # schedule
         repeat = 0
         if instance.repeat:
             repeat = None

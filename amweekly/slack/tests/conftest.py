@@ -7,7 +7,7 @@ from amweekly.slack.tests.factories import SlashCommandFactory, \
 import pytest
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def scheduler():
     scheduler = django_rq.get_scheduler('default')
     prev_jobs = scheduler.get_jobs()
