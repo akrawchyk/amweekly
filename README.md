@@ -1,6 +1,6 @@
 # amweekly
 
-[![Build Status](https://api.travis-ci.org/akrawchyk/amweekly.svg?branch=master)](https://api.travis-ci.org/akrawchyk/amweekly.svg?branch=master)
+[![Build Status](https://api.travis-ci.org/akrawchyk/amweekly.svg?branch=master)](https://travis-ci.org/akrawchyk/amweekly)
 [![Test Coverage](https://codeclimate.com/github/akrawchyk/amweekly/badges/coverage.svg)](https://codeclimate.com/github/akrawchyk/amweekly/coverage)
 [![Code Climate](https://codeclimate.com/github/akrawchyk/amweekly/badges/gpa.svg)](https://codeclimate.com/github/akrawchyk/amweekly)
 
