@@ -32,8 +32,7 @@ def slash_command_webhook(request):
 
     webhook_transaction = WebhookTransaction.objects.create(
         body=request.POST.dict(),
-        headers={}  # TODO: copy request.META here
-    )
+        headers={})  # TODO: copy request.META here
 
     logger.info('Processing WebhookTransaction {}'.format(
         webhook_transaction.id))

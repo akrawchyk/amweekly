@@ -30,9 +30,10 @@ def process_slash_command_webhook(webhook_transaction_id):
         webhook_transaction.status = WebhookTransaction.PROCESSED
         webhook_transaction.integration = slash_command
         webhook_transaction.save()
-        log = 'SlashCommand {} processed successfully'.format(slash_command.id)
-        logger.info(log)
-        return log
+        logger.info('SlashCommand {} processed successfully'.format(
+            slash_command.id))
+        return 'Saved the url {}, thanks for sharing!'.format(
+            webhook_transaction.body.get('text'))
     except Exception as e:
         webhook_transaction.status = WebhookTransaction.ERROR
         webhook_transaction.save()
