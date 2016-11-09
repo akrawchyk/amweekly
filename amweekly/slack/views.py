@@ -26,6 +26,8 @@ def slash_command_webhook(request):
 
     command = request.POST.get('command')
 
+    # TODO validate we know how to handle command
+
     if not command:
         logger.error('Webhook request is not a command.')
         return HttpResponse(status=400)
