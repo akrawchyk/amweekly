@@ -67,8 +67,8 @@ def hydrate_share_meta_url(share_id):
         og_object = get_og_object(share.url)
 
         if og_object['id'] is None:
-            raise Exception('No Open Graph object returned for {}'.format(
-                share.url))
+            raise Exception(
+                'No Open Graph object returned for Share {}'.format(share.id))
 
         meta_url, created = MetaURL.objects.get_or_create(
             og_id=og_object['id'])
@@ -90,8 +90,9 @@ def refresh_meta_url(meta_url_id):
         og_object = get_og_object(id=meta_url.og_id)
 
         if og_object['id'] is None:
-            raise Exception('No Open Graph object returned for {}'.format(
-                share.url))
+            raise Exception(
+                'No Open Graph object returned for MetaURL {}'.format(
+                    meta_url.id))
 
         keys = ('title', 'description', 'type', 'id')
         for k in keys:
