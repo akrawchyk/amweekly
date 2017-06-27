@@ -46,8 +46,8 @@ class Share(models.Model):
         return '{} on {}'.format(self.user_name, self.created_at)
 
     def slack_format(self):
-        if self.title:
-            return f'<{self.url}|{self.title}>'
+        if self.meta_url and self.meta_url.og_title:
+            return f'<{self.url}|{self.meta_url.og_title}>'
         return f'<{self.url}>'
 
     @property

@@ -9,7 +9,7 @@ from amweekly.slack.models import IncomingWebhook, SlashCommand, \
     WebhookTransaction
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('amweekly.jobs')
 
 
 def process_slash_command_webhook(webhook_transaction_id):
@@ -51,8 +51,8 @@ def process_incoming_webhook(start, end):
 
         shares = Share.objects.between_dates(start, end)
 
-        attachments = {
-            'fallback': '',
+        attachment = {
+            'fallback': 'Hello from Andrew',
             # 'pretext': '',
             # 'text': '',
             'fields': [],
@@ -64,11 +64,13 @@ def process_incoming_webhook(start, end):
                 'value': share.slack_format(),
                 'short': False,
             }
-            attachments['fields'].append(share_doc)
+            attachment['fields'].append(share_doc)
 
-        headers = {'Content-type': 'application/json'}
-        message = {'attachments': attachments}
-        kwargs = {'headers': headers}
+        message = {
+            'text': f'Antimatter Weekly URLs for {start.date()} through {end.date()}',  # noqa
+            'attachments': [attachment]
+        }
+        kwargs = {'headers': {'Content-type': 'application/json'}}
 
         if incoming_webhook.username:
             message['username'] = incoming_webhook.username
@@ -87,6 +89,7 @@ def process_incoming_webhook(start, end):
             r = requests.post(
                 incoming_webhook.webhook_url,
                 **kwargs)
+            logger.info(f'{r.status_code}: {r.content}')
             r.raise_for_status()
             webhook_transaction.status = WebhookTransaction.PROCESSED
             webhook_transaction.save()
