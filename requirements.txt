@@ -22,8 +22,6 @@ raven>=5.16,<5.17
 
 django-import-export>=0.4,<0.5
 
-opengraph>=0.5,<0.6
-
 facebook-sdk>=2.0,<2.1
 
 crontab>=0.21,<0.22
