@@ -1,10 +1,13 @@
 import json
 import logging
 
+import requests
+from django_rq import job
+
+from amweekly.shares.models import Share
 from amweekly.slack.models import IncomingWebhook, SlashCommand, \
     WebhookTransaction
 
-import requests
 
 logger = logging.getLogger(__name__)
 
@@ -42,15 +45,30 @@ def process_slash_command_webhook(webhook_transaction_id):
         return log
 
 
-def process_incoming_webhook(incoming_webhook_id):
-    try:
-        incoming_webhook = IncomingWebhook.objects.get(pk=incoming_webhook_id)
-        headers = {
-            'Content-type': 'application/json', }
-        message = {
-            'text': incoming_webhook.text, }
-        kwargs = {
-            'headers': headers, }
+@job
+def process_incoming_webhook(start, end):
+    for incoming_webhook in IncomingWebhook.objects.all():
+
+        shares = Share.objects.between_dates(start, end)
+
+        attachments = {
+            'fallback': '',
+            # 'pretext': '',
+            # 'text': '',
+            'fields': [],
+        }
+
+        for share in shares:
+            share_doc = {
+                'title': f'shared by {share.user_name}',
+                'value': share.slack_format(),
+                'short': False,
+            }
+            attachments['fields'].append(share_doc)
+
+        headers = {'Content-type': 'application/json'}
+        message = {'attachments': attachments}
+        kwargs = {'headers': headers}
 
         if incoming_webhook.username:
             message['username'] = incoming_webhook.username
@@ -79,8 +97,4 @@ def process_incoming_webhook(incoming_webhook_id):
             webhook_transaction.save()
             logger.error(
                 'IncomingWebhook {} failed to POST: {}'.format(
-                    incoming_webhook_id, str(e)))
-    except IncomingWebhook.DoesNotExist:
-        logger.error(
-            'IncomingWebhook with id {} does not exist'.format(
-                incoming_webhook_id))
+                    incoming_webhook.pk, str(e)))

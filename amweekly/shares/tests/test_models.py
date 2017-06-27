@@ -1,7 +1,10 @@
-from django.db.models.signals import post_save
+import datetime
 
 import factory
 import pytest
+from django.db.models.signals import post_save
+
+from amweekly.shares.models import Share
 
 pytest.mark.unit
 
@@ -31,3 +34,48 @@ def test_share_title_display_without_title(share):
     with factory.django.mute_signals(post_save):
         share.save()
     assert share.title_display == share.url
+
+
+@pytest.mark.django_db
+def test_shares_between_dates(share):
+    start = share.created_at - datetime.timedelta(minutes=1)
+    end = share.created_at + datetime.timedelta(minutes=1)
+    share_ids = Share.objects.between_dates(
+        start, end).values_list('pk', flat=True)
+    assert share.pk in share_ids
+
+
+@pytest.mark.django_db
+def test_shares_on_start_date(share):
+    start = share.created_at
+    end = share.created_at + datetime.timedelta(minutes=1)
+    share_ids = Share.objects.between_dates(
+        start, end).values_list('pk', flat=True)
+    assert share.pk in share_ids
+
+
+@pytest.mark.django_db
+def test_shares_on_end_date(share):
+    start = share.created_at - datetime.timedelta(minutes=1)
+    end = share.created_at
+    share_ids = Share.objects.between_dates(
+        start, end).values_list('pk', flat=True)
+    assert share.pk in share_ids
+
+
+@pytest.mark.django_db
+def test_shares_before_dates(share):
+    start = share.created_at + datetime.timedelta(minutes=1)
+    end = share.created_at + datetime.timedelta(minutes=2)
+    share_ids = Share.objects.between_dates(
+        start, end).values_list('pk', flat=True)
+    assert share.pk not in share_ids
+
+
+@pytest.mark.django_db
+def test_shares_after_dates(share):
+    start = share.created_at - datetime.timedelta(minutes=2)
+    end = share.created_at - datetime.timedelta(minutes=1)
+    share_ids = Share.objects.between_dates(
+        start, end).values_list('pk', flat=True)
+    assert share.pk not in share_ids
