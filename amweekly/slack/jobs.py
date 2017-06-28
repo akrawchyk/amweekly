@@ -1,12 +1,15 @@
 import json
 import logging
 
+import requests
+from django_rq import job
+
+from amweekly.shares.models import Share
 from amweekly.slack.models import IncomingWebhook, SlashCommand, \
     WebhookTransaction
 
-import requests
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('amweekly.jobs')
 
 
 def process_slash_command_webhook(webhook_transaction_id):
@@ -42,15 +45,32 @@ def process_slash_command_webhook(webhook_transaction_id):
         return log
 
 
-def process_incoming_webhook(incoming_webhook_id):
-    try:
-        incoming_webhook = IncomingWebhook.objects.get(pk=incoming_webhook_id)
-        headers = {
-            'Content-type': 'application/json', }
+@job
+def process_incoming_webhook(start, end):
+    for incoming_webhook in IncomingWebhook.objects.filter(enabled=True):
+
+        shares = Share.objects.between_dates(start, end)
+
+        attachment = {
+            'fallback': f'Antimatter Weekly URLs for {start.date()} through {end.date()}',  # noqa
+            # 'pretext': '',
+            # 'text': '',
+            'fields': [],
+        }
+
+        for share in shares:
+            share_doc = {
+                'title': f'shared by {share.user_name}',
+                'value': share.slack_format(),
+                'short': False,
+            }
+            attachment['fields'].append(share_doc)
+
         message = {
-            'text': incoming_webhook.text, }
-        kwargs = {
-            'headers': headers, }
+            'text': f'Antimatter Weekly URLs for {start.date()} through {end.date()}',  # noqa
+            'attachments': [attachment]
+        }
+        kwargs = {'headers': {'Content-type': 'application/json'}}
 
         if incoming_webhook.username:
             message['username'] = incoming_webhook.username
@@ -69,6 +89,7 @@ def process_incoming_webhook(incoming_webhook_id):
             r = requests.post(
                 incoming_webhook.webhook_url,
                 **kwargs)
+            logger.info(f'{r.status_code}: {r.content}')
             r.raise_for_status()
             webhook_transaction.status = WebhookTransaction.PROCESSED
             webhook_transaction.save()
@@ -79,8 +100,4 @@ def process_incoming_webhook(incoming_webhook_id):
             webhook_transaction.save()
             logger.error(
                 'IncomingWebhook {} failed to POST: {}'.format(
-                    incoming_webhook_id, str(e)))
-    except IncomingWebhook.DoesNotExist:
-        logger.error(
-            'IncomingWebhook with id {} does not exist'.format(
-                incoming_webhook_id))
+                    incoming_webhook.pk, str(e)))

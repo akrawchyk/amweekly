@@ -26,6 +26,5 @@ class SlashCommandAdmin(admin.ModelAdmin):
 @admin.register(IncomingWebhook)
 class IncomingWebhookAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
-    readonly_fields = ('job_id', )
-    list_display = ('username', 'enabled', 'is_scheduled',)
+    list_display = ('username', 'enabled', )
     list_filter = ('username', 'enabled', )

@@ -22,7 +22,14 @@ class MetaURL(models.Model):
         return truncatechars(self.og_description, 140)
 
 
+class ShareManager(models.Manager):
+    def between_dates(self, start, end):
+        return Share.objects.filter(
+            created_at__gte=start, created_at__lte=end)
+
+
 class Share(models.Model):
+    objects = ShareManager()
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     user_name = models.CharField(max_length=255)
@@ -37,6 +44,11 @@ class Share(models.Model):
 
     def __str__(self):
         return '{} on {}'.format(self.user_name, self.created_at)
+
+    def slack_format(self):
+        if self.meta_url and self.meta_url.og_title:
+            return f'<{self.url}|{self.meta_url.og_title}>'
+        return f'<{self.url}>'
 
     @property
     def title_display(self):

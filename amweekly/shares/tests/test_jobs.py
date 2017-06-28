@@ -3,7 +3,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db.models.signals import post_save
 
 from amweekly.shares.jobs import get_og_object, hydrate_share_meta_url, \
-    CACHE_APP_ACCESS_TOKEN
+     CACHE_APP_ACCESS_TOKEN
 
 import factory
 import pytest
@@ -28,6 +28,12 @@ def test_get_og_object_caches_app_access_token():
     get_og_object('http://facebook.com')
     app_access_token = cache.get(CACHE_APP_ACCESS_TOKEN)
     assert app_access_token is not None
+
+
+@pytest.mark.slowtest
+def test_get_og_object():
+    og_object = get_og_object('http://facebook.com')
+    assert 'Facebook' in og_object['title']
 
 
 @pytest.mark.django_db

@@ -2,6 +2,8 @@ import csv
 import json
 from datetime import datetime
 
+"""Useful for converting DynamoDB exports to CSV"""
+
 
 data = []
 with open('data') as f:

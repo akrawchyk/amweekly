@@ -27,7 +27,7 @@ Expected Graph API Response:
 """
 
 
-def get_og_object(url=None, id=None):
+def get_og_object(id):
     if settings.FACEBOOK_APP_ID is '' or \
        settings.FACEBOOK_APP_SECRET is '':
         raise ImproperlyConfigured(
@@ -45,18 +45,15 @@ def get_og_object(url=None, id=None):
 
     if id is not None:
         og = graph.get_object(id=id)
-    elif url is not None:
-        og = graph.get_object(url)
     else:
-        raise Exception('Expected either url or id as kwargs')
+        raise Exception('Required id argument')
 
     og_object = None
 
     if 'og_object' in og:
         og_object = og['og_object']
     else:
-        lookup = id if id is not None else url
-        logger.error('No Open Graph object found for {}'.format(lookup))
+        logger.error(f'No Open Graph object found for {id}')
 
     return og_object
 
@@ -68,7 +65,7 @@ def hydrate_share_meta_url(share_id):
 
         if og_object['id'] is None:
             raise Exception(
-                'No Open Graph object returned for Share {}'.format(share.id))
+                f'No Open Graph object returned for Share {share_id}')
 
         meta_url, created = MetaURL.objects.get_or_create(
             og_id=og_object['id'])
@@ -76,30 +73,9 @@ def hydrate_share_meta_url(share_id):
         keys = ('title', 'description', 'type', 'id')
         for k in keys:
             if k in og_object:
-                setattr(meta_url, 'og_{}'.format(k), og_object[k])
+                setattr(meta_url, f'og_{k}', og_object[k])
 
         meta_url.share_set.add(share)
         meta_url.save()
     except Share.DoesNotExist:
-        logger.error('Share with id {} does not exist.'.format(share_id))
-
-
-def refresh_meta_url(meta_url_id):
-    try:
-        meta_url = MetaURL.objects.get(pk=meta_url_id)
-        og_object = get_og_object(id=meta_url.og_id)
-
-        if og_object['id'] is None:
-            raise Exception(
-                'No Open Graph object returned for MetaURL {}'.format(
-                    meta_url.id))
-
-        keys = ('title', 'description', 'type', 'id')
-        for k in keys:
-            if k in og_object:
-                setattr(meta_url, 'og_{}'.format(k), og_object[k])
-
-        meta_url.save()
-        logger.info('MetaURL {} refreshed'.format(meta_url_id))
-    except MetaURL.DoesNotExist:
-        logger.error('MetaURL {} does not exist.'.format(meta_url_id))
+        logger.error(f'Share with id {share_id} does not exist.')
