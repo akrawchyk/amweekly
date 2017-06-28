@@ -11,7 +11,7 @@ logger = logging.getLogger('amweekly.command')
 
 
 class Command(BaseCommand):
-    help = 'Post links from the past week to Slack'
+    help = 'Scrambles all shares created_at field'
 
     def handle(self, *args, **options):
 
