@@ -50,15 +50,6 @@ class BaseSchedulable(models.Model):
     class Meta:
         abstract = True
 
-    # TODO crontab validator? thanks solomon
-    def clean(self, *args, **kwargs):
-        try:
-            CronTab(self.crontab)
-        except:
-            raise ValidationError(_('Unrecognized crontab `{}`').format(
-                self.crontab))
-        super(BaseSchedulable, self).clean(*args, **kwargs)
-
     def is_scheduled(self):
         return self.job_id is not ''
     is_scheduled.boolean = True
