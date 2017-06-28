@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
         today = datetime.datetime.utcnow().date()
 
-        if today.weekday() == FRIDAY:
+        if today.weekday() != FRIDAY:
             logger.info('Skip posting to Slack, we only post on Friday')
             return
 
