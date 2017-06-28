@@ -34,25 +34,6 @@ class BaseTransaction(models.Model):
         abstract = True
 
 
-class BaseSchedulable(models.Model):
-    """
-    Used to schedule Slack jobs with a crontab
-    """
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    enabled = models.BooleanField(default=True)
-    job_id = models.CharField(blank=True, max_length=255)
-    crontab = models.CharField(max_length=255)
-    repeat = models.BooleanField(default=False)
-
-    class Meta:
-        abstract = True
-
-    def is_scheduled(self):
-        return self.job_id is not ''
-    is_scheduled.boolean = True
-
-
 class WebhookTransaction(BaseTransaction, models.Model):
     """
     Represents a webhook transaction with Slack. Stores raw transaction data as
@@ -96,7 +77,7 @@ class SlashCommand(models.Model):
         super(SlashCommand, self).save(*args, **kwargs)
 
 
-class IncomingWebhook(BaseSchedulable, models.Model):
+class IncomingWebhook(models.Model):
     """
     Incoming Webhooks are a simple way to post messages from external sources
     into Slack. They make use of normal HTTP requests with a JSON payload that
@@ -106,6 +87,9 @@ class IncomingWebhook(BaseSchedulable, models.Model):
 
     See docs at https://api.slack.com/incoming-webhooks.
     """
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    enabled = models.BooleanField(default=True)
     webhook_transactions = GenericRelation(WebhookTransaction)
     webhook_url = models.URLField()
     text = models.TextField(blank=True)
