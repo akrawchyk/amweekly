@@ -7,9 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
 
-from crontab import CronTab
 
 logger = logging.getLogger(__name__)
 
