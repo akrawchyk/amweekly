@@ -47,12 +47,12 @@ def process_slash_command_webhook(webhook_transaction_id):
 
 @job
 def process_incoming_webhook(start, end):
-    for incoming_webhook in IncomingWebhook.objects.all():
+    for incoming_webhook in IncomingWebhook.objects.filter(enabled=True):
 
         shares = Share.objects.between_dates(start, end)
 
         attachment = {
-            'fallback': 'Hello from Andrew',
+            'fallback': f'Antimatter Weekly URLs for {start.date()} through {end.date()}',  # noqa
             # 'pretext': '',
             # 'text': '',
             'fields': [],
