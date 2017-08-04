@@ -10,6 +10,6 @@ class HomePageView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(HomePageView, self).get_context_data(**kwargs)
-        shares = Share.objects.all()[:10]
+        shares = Share.objects.all().order_by('-created_at')[:10]
         context['shares'] = shares
         return context
