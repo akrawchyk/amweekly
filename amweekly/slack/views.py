@@ -40,3 +40,14 @@ def slash_command_webhook(request):
         webhook_transaction.id))
     message = process_slash_command_webhook(webhook_transaction.id)
     return HttpResponse(message, status=200)
+
+
+@csrf_exempt
+@require_POST
+def events_challenge_response(request):
+    """
+    Response to a challenge request to verify ownership of an Events API Request URL
+    https://api.slack.com/events/url_verification
+    """
+    challenge = request.POST.get('challenge')
+    return HttpResponse(challenge, content_type='text/plain')
