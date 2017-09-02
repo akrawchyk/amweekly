@@ -49,6 +49,7 @@ INSTALLED_APPS = (
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -60,6 +61,7 @@ MIDDLEWARE = [
 ]
 
 if DEBUG:
+    INSTALLED_APPS = ('whitenoise.runserver_nostatic',) + INSTALLED_APPS
     INSTALLED_APPS += ('debug_toolbar',)
     MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
 
@@ -116,11 +118,16 @@ CACHE_MIDDLEWARE_KEY_PREFIX = config('CACHE_MIDDLEWARE_KEY_PREFIX',
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'public', 'static')
 
-STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'public', 'media')
+
+# whitenoise
+# https://github.com/evansd/whitenoise/blob/master/docs/django.rst
+
+WHITENOISE_ROOT = os.path.join(BASE_DIR, 'public')
 
 # Logging
 
