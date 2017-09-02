@@ -50,4 +50,7 @@ def events_challenge_response(request):
     https://api.slack.com/events/url_verification
     """
     challenge = request.POST.get('challenge')
+    body = request.POST.get('body')
+    logger.info(challenge)
+    logger.info(body)
     return HttpResponse(challenge, content_type='text/plain')
