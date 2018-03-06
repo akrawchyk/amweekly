@@ -9,7 +9,7 @@ python-decouple==3.0
 pytz==2015.7
 sqlparse>=0.2,<0.3
 
-psycopg2>=2.6,<2.7
+psycopg2-binary>=2.7,<2.8
 
 redis>=2.10,<2.11
 django-redis>=4.3,<4.4
@@ -33,3 +33,5 @@ pytest-httpretty>=0.2,<0.3
 pytest-mock>=1.3,<1.4
 factory_boy>=2.8,<2.9
 codeclimate-test-reporter>-0.2,<0.3
+
+freezegun>=0.3,<0.4
